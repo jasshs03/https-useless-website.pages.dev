@@ -16,6 +16,8 @@ import { initKonami } from './modules/konami.js';
 import { initBootSequence } from './modules/boot-sequence.js';
 import { initPixelPet } from './modules/pixel-pet.js';
 import { initGlobalCounter } from './modules/global-counter.js';
+import { initSecretCat } from './modules/secret-cat.js';
+import { initVoidMode } from './modules/void-mode.js';
 
 // New experience modules
 import { initBored } from './modules/bored.js';
@@ -26,10 +28,12 @@ import { initIdleAura } from './modules/idle-aura.js';
 
 // Boot all the uselessness. Each module no-ops if its elements
 // aren't on the current page, so a single entry point works everywhere. 🥔
+initVoidMode();      // first so .void-mode class is applied before paint
 initFunFact();
 initMilestones();
 initBootSequence();
 initKonami();
+initSecretCat();
 
 initRunawayButton();
 initCounter();

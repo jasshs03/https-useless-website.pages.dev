@@ -1,5 +1,26 @@
 // Spider pixel pet that REPLACES the OS mouse cursor.
 // Snaps to the exact pointer position, naps after a few seconds of no movement.
+// Easter egg: click 10 times (anywhere) to permanently unlock the GOLDEN spider. ✨
+const CLICK_KEY  = 'useless-spider-clicks';
+const GOLDEN_KEY = 'useless-spider-golden';
+const GOLDEN_AT  = 10;
+
+function showSpiderToast(text) {
+  let stack = document.querySelector('.toast-stack');
+  if (!stack) {
+    stack = document.createElement('div');
+    stack.className = 'toast-stack';
+    document.body.appendChild(stack);
+  }
+  const toast = document.createElement('div');
+  toast.className = 'toast toast--warn';
+  toast.innerHTML = '<span class="toast__tag">★</span><span class="toast__msg"></span>';
+  toast.querySelector('.toast__msg').textContent = text;
+  stack.appendChild(toast);
+  setTimeout(() => toast.classList.add('toast--leaving'), 3000);
+  setTimeout(() => toast.remove(), 3600);
+}
+
 export function initPixelPet() {
   // Don't add the pet on the cat-trail page (would compete with cats)
   if (document.getElementById('cat-stage')) return;
@@ -11,6 +32,11 @@ export function initPixelPet() {
 
   // Mark <html> so CSS can hide the native cursor everywhere
   document.documentElement.classList.add('spider-cursor');
+
+  // Restore golden state if already unlocked in a previous visit
+  let golden = localStorage.getItem(GOLDEN_KEY) === '1';
+  let clicks = Number(localStorage.getItem(CLICK_KEY)) || 0;
+  if (golden) pet.classList.add('pet--golden');
 
   // Center the spider glyph on the pointer (measured once after mount)
   let halfW = 12, halfH = 12;
@@ -40,6 +66,27 @@ export function initPixelPet() {
       pet.classList.remove('pet--nap');
     }
   }, { passive: true });
+
+  // Count any click toward the golden-spider unlock.
+  // (Spider has pointer-events:none, so clicks pass through — but the spider
+  // IS the cursor, so every click feels like "clicking" it.)
+  document.addEventListener('click', () => {
+    if (golden) return;
+    clicks += 1;
+    try { localStorage.setItem(CLICK_KEY, String(clicks)); } catch (e) { /* ignore */ }
+
+    // Tiny squish animation on every click so the spider feels reactive
+    pet.classList.remove('pet--squish');
+    void pet.offsetWidth;
+    pet.classList.add('pet--squish');
+
+    if (clicks >= GOLDEN_AT) {
+      golden = true;
+      try { localStorage.setItem(GOLDEN_KEY, '1'); } catch (e) { /* ignore */ }
+      pet.classList.add('pet--golden');
+      showSpiderToast('✨ GOLDEN SPIDER unlocked — still useless.');
+    }
+  });
 
   // Hide spider when the cursor leaves the window
   document.addEventListener('pointerleave', () => {

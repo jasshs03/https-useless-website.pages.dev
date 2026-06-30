@@ -32,6 +32,15 @@ const STARTING_COOKIES = 5;
 const XP_PER_ACTION = 1;
 const XP_PER_LEVEL  = 25;
 
+// --- escape easter egg ---
+const ESCAPE_AFTER_MS = 60 * 1000; // 1 minute of total inactivity
+const ESCAPE_LINES = [
+  'aura left to find someone who pays attention.',
+  'she\'s outside. probably touching grass.',
+  '...the room is empty.',
+  'gone. log off too maybe.',
+];
+
 // --- ad spawn config ---
 const AD_MIN_DELAY_MS = 22000;
 const AD_MAX_DELAY_MS = 48000;
@@ -204,6 +213,11 @@ let activeAd = null;        // currently visible ad node
 let nextAdTimer = null;
 let lastPlayAt = 0, lastFeedAt = 0;
 let speechTimer = null;
+
+// --- escape easter egg state ---
+let lastInteraction = performance.now();
+let escaped = false;
+let escapeNoteEl = null;
 
 // ====================================================
 // Render — character
@@ -488,6 +502,45 @@ function resetGame() {
 }
 
 // ====================================================
+// Escape easter egg — Aura walks out after 1 min of idle
+// ====================================================
+function markInteraction() {
+  lastInteraction = performance.now();
+  if (escaped) returnAura();
+}
+
+function escapeAura() {
+  if (escaped || !canvas) return;
+  escaped = true;
+  canvas.classList.add('aura-character--escaped');
+
+  // Show a small "she left" note in the room
+  if (room && !escapeNoteEl) {
+    escapeNoteEl = document.createElement('div');
+    escapeNoteEl.className = 'aura-escape-note';
+    const line = ESCAPE_LINES[Math.floor(Math.random() * ESCAPE_LINES.length)];
+    escapeNoteEl.textContent = line;
+    room.appendChild(escapeNoteEl);
+    requestAnimationFrame(() => escapeNoteEl.classList.add('aura-escape-note--show'));
+  }
+  // Close any active ad — she's not here to be bothered anyway
+  if (activeAd) closeAd(activeAd, false);
+}
+
+function returnAura() {
+  if (!escaped || !canvas) return;
+  escaped = false;
+  canvas.classList.remove('aura-character--escaped');
+  if (escapeNoteEl) {
+    escapeNoteEl.classList.remove('aura-escape-note--show');
+    const note = escapeNoteEl;
+    escapeNoteEl = null;
+    setTimeout(() => { if (note.parentNode) note.parentNode.removeChild(note); }, 350);
+  }
+  setTimeout(() => say('oh. you\'re back.', 1800), 700);
+}
+
+// ====================================================
 // Boot
 // ====================================================
 export function initIdleAura() {
@@ -558,6 +611,22 @@ export function initIdleAura() {
 
   // Schedule the first ad
   scheduleNextAd();
+
+  // ---- Escape easter egg wiring ----
+  // Any of these counts as "you're still here"
+  ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((evt) => {
+    document.addEventListener(evt, markInteraction, { passive: true });
+  });
+  // Action button clicks reset idle too
+  Object.values(actionBtns).forEach((btn) => {
+    btn && btn.addEventListener('click', markInteraction);
+  });
+  // Check every second whether Aura should bail
+  setInterval(() => {
+    if (!escaped && performance.now() - lastInteraction > ESCAPE_AFTER_MS) {
+      escapeAura();
+    }
+  }, 1000);
 
   // Save on hide/unload
   document.addEventListener('visibilitychange', () => {
