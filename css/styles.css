@@ -591,11 +591,11 @@ body.modal-open { overflow: hidden; }
 }
 
 /* ============================================================
-   Fun Fact (top-right) — mirrors .site-credit style on the left
+   Fun Fact (bottom-right) — mirrors .site-credit style on the left
    ============================================================ */
 .fun-fact {
   position: fixed;
-  top: 0.9rem;
+  bottom: 3.5rem; /* clear of the fixed footer */
   right: 1.1rem;
   z-index: 5;
   font-family: var(--font-mono);
@@ -641,8 +641,8 @@ body.modal-open { overflow: hidden; }
 @media (max-width: 560px) {
   .fun-fact {
     font-size: 0.65rem;
-    max-width: 50vw;
-    top: 0.6rem;
+    max-width: 70vw;
+    bottom: 3rem;
     right: 0.7rem;
   }
 }
@@ -997,23 +997,6 @@ footer .foot-center {
   line-height: 1.4;
 }
 footer .accent { color: var(--accent-amber); }
-
-/* AI-generated label — inline with the rest of the footer text */
-.ai-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: var(--text-dim);
-  font-size: 0.8rem;
-  letter-spacing: 0;
-  text-transform: none;
-  font-family: var(--font-mono);
-}
-.ai-badge .spark { animation: spark-pulse 2.2s ease-in-out infinite; }
-@keyframes spark-pulse {
-  0%, 100% { opacity: 0.7; transform: scale(1); }
-  50%      { opacity: 1;   transform: scale(1.15); }
-}
 
 /* On narrow screens, allow wrapping */
 @media (max-width: 520px) {
