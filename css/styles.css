@@ -694,7 +694,8 @@ html.spider-cursor * {
   position: fixed;
   top: 0; left: 0;
   pointer-events: none;
-  z-index: 9999;
+  /* Above the fake-locator overlay (10000) so the spider stays the cursor */
+  z-index: 100000;
   font-size: 1.4rem;
   filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.4));
   /* No transition — must snap to cursor every frame, no lag */
@@ -2398,7 +2399,7 @@ html.void-mode .pet__body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-height: 168px;
+  min-height: 260px;
 }
 .fake-locator__step {
   display: flex;

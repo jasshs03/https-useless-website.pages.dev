@@ -8,11 +8,14 @@
 const SESSION_KEY = 'useless-locator-seen';
 
 const STEPS = [
-  { label: 'Obtaining your IP address',  ms: 900 },
-  { label: 'Checking system config',     ms: 750 },
-  { label: 'Pinging satellite #7',       ms: 850 },
-  { label: 'Cross-referencing potatoes', ms: 650 },
-  { label: 'Locating you on the map',    ms: 950 },
+  { label: 'Obtaining your IP address',          ms: 2200 },
+  { label: 'Checking system configuration',       ms: 1800 },
+  { label: 'Pinging satellite #7',                ms: 2400 },
+  { label: 'Triangulating cell towers',           ms: 1900 },
+  { label: 'Cross-referencing potatoes',          ms: 1600 },
+  { label: 'Asking your neighbor (politely)',     ms: 1700 },
+  { label: 'Decrypting your browser history',     ms: 2100 },
+  { label: 'Locating you on the map',             ms: 2300 },
 ];
 
 function escapeHTML(s) {
@@ -77,7 +80,7 @@ function runLocator(overlay, onFinished) {
       setTimeout(() => {
         overlay.classList.add('fake-locator--revealed');
         reveal.hidden = false;
-      }, 350);
+      }, 900);
       return;
     }
     const step = STEPS[i];
