@@ -683,15 +683,23 @@ body.modal-open { overflow: hidden; }
 /* ============================================================
    Pixel pet (cursor follower)
    ============================================================ */
+/* When the spider is active, hide the native OS cursor everywhere
+   (including over links/buttons/inputs) so the spider IS the cursor. */
+html.spider-cursor,
+html.spider-cursor * {
+  cursor: none !important;
+}
+
 .pet {
   position: fixed;
   top: 0; left: 0;
   pointer-events: none;
-  z-index: 4;
+  z-index: 9999;
   font-size: 1.4rem;
   filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.4));
-  transition: transform 0.05s linear;
+  /* No transition — must snap to cursor every frame, no lag */
   will-change: transform;
+  opacity: 0;
 }
 .pet__body { display: inline-block; animation: pet-bob 1.2s ease-in-out infinite; }
 @keyframes pet-bob {
