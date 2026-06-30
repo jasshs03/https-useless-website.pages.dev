@@ -689,8 +689,7 @@ footer {
   right: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: center;
   padding: 0.6rem 1.1rem;
   font-family: var(--font-mono);
   font-size: 0.8rem;
@@ -700,22 +699,13 @@ footer {
   backdrop-filter: blur(8px);
   z-index: 3;
 }
-footer .foot-left,
-footer .foot-right {
-  flex: 1 1 0;
-  display: flex;
-  align-items: center;
-}
-footer .foot-left  { justify-content: flex-start; }
-footer .foot-right { justify-content: flex-end; }
 footer .foot-center {
-  flex: 0 1 auto;
   text-align: center;
-  white-space: nowrap;
+  line-height: 1.4;
 }
 footer .accent { color: var(--accent-amber); }
 
-/* AI-generated label — plain footer text, matches the center copy */
+/* AI-generated label — inline with the rest of the footer text */
 .ai-badge {
   display: inline-flex;
   align-items: center;
@@ -732,8 +722,7 @@ footer .accent { color: var(--accent-amber); }
   50%      { opacity: 1;   transform: scale(1.15); }
 }
 
-/* On narrow screens, drop the left spacer so the center stays centered */
+/* On narrow screens, allow wrapping */
 @media (max-width: 520px) {
-  footer .foot-left { display: none; }
   footer .foot-center { font-size: 0.72rem; }
 }
