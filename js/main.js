@@ -11,6 +11,7 @@ import { initSocialsModal } from './modules/socials-modal.js';
 
 // Site-wide chrome
 import { initFunFact } from './modules/fun-fact.js';
+import { initMilestones } from './modules/milestones.js';
 import { initKonami } from './modules/konami.js';
 import { initBootSequence } from './modules/boot-sequence.js';
 import { initPixelPet } from './modules/pixel-pet.js';
@@ -25,6 +26,7 @@ import { initVisitorsMap } from './modules/visitors.js';
 // Boot all the uselessness. Each module no-ops if its elements
 // aren't on the current page, so a single entry point works everywhere. 🥔
 initFunFact();
+initMilestones();
 initBootSequence();
 initKonami();
 

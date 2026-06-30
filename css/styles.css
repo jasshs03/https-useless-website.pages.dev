@@ -998,3 +998,63 @@ footer .accent { color: var(--accent-amber); }
 @media (max-width: 520px) {
   footer .foot-center { font-size: 0.72rem; }
 }
+
+/* ============================================================
+   Milestone toasts (time-on-page achievements)
+   ============================================================ */
+.milestone-stack {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  pointer-events: none;
+  max-width: min(360px, 80vw);
+}
+.milestone-toast {
+  pointer-events: auto;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text);
+  background: rgba(8, 18, 38, 0.88);
+  backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in srgb, var(--accent-lime) 55%, transparent);
+  border-left: 3px solid var(--accent-lime);
+  border-radius: 8px;
+  padding: 0.7rem 0.95rem;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.4),
+    0 0 18px color-mix(in srgb, var(--accent-lime) 25%, transparent);
+  opacity: 0;
+  transform: translateX(120%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+}
+.milestone-toast--in {
+  opacity: 1;
+  transform: translateX(0);
+}
+.milestone-toast--out {
+  opacity: 0;
+  transform: translateX(120%);
+}
+.milestone-toast:hover {
+  border-color: var(--accent-lime);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    0 0 24px color-mix(in srgb, var(--accent-lime) 45%, transparent);
+}
+
+@media (max-width: 560px) {
+  .milestone-stack {
+    top: auto;
+    bottom: 4.5rem;
+    right: 0.6rem;
+    left: 0.6rem;
+    max-width: none;
+  }
+  .milestone-toast { font-size: 0.78rem; }
+}
