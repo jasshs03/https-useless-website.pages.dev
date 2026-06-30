@@ -1061,309 +1061,1077 @@ footer .accent { color: var(--accent-amber); }
 
 
 /* ============================================================
-   Mini Idle Aura — game styles
+   Mini Idle Aura — virtual pet room game
    ============================================================ */
-.aura-game {
-  max-width: 720px;
+.aura-pet-game {
+  max-width: 1000px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 1.25rem;
+  align-items: start;
 }
 
-/* Top stats row */
-.aura-stats {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 0.75rem;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 14px;
-  padding: 1rem 1.25rem;
-  backdrop-filter: blur(8px);
-  box-shadow: var(--shadow-glow);
-}
-.aura-stat {
+/* -------- ROOM -------- */
+.aura-room-wrap {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  font-family: var(--font-mono);
-  gap: 0.25rem;
+  gap: 0.9rem;
   min-width: 0;
 }
-.aura-stat__label {
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-}
-.aura-stat__value {
-  font-size: 1.25rem;
-  color: var(--accent-cyan);
-  text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
-  font-variant-numeric: tabular-nums;
-  word-break: break-all;
-}
-.aura-stat--primary .aura-stat__value {
-  font-size: 1.9rem;
-  color: var(--accent-lime);
-  text-shadow: 0 0 14px rgba(127, 255, 138, 0.55);
-}
-.aura-stat__value--rate { color: var(--accent-amber); text-shadow: 0 0 10px rgba(255, 183, 3, 0.4); }
-.aura-stat__value--tap  { color: var(--accent-violet); text-shadow: 0 0 10px rgba(124, 92, 255, 0.45); }
 
-/* The Orb */
-.aura-orb-wrap {
+.aura-room {
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem 0 0.5rem;
-}
-.aura-orb {
-  position: relative;
-  width: clamp(180px, 38vw, 240px);
-  height: clamp(180px, 38vw, 240px);
-  padding: 0;
-  border-radius: 50%;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  outline-offset: 6px;
-  filter: drop-shadow(0 0 24px rgba(0, 229, 255, 0.45));
-  transition: transform 0.08s ease;
-}
-.aura-orb:active { transform: scale(0.94); }
-.aura-orb:hover { box-shadow: none; background: transparent; }
-
-.aura-orb__core {
-  position: absolute;
-  inset: 14%;
-  border-radius: 50%;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-glow), inset 0 0 80px rgba(124, 92, 255, 0.15);
+  /* Wall gradient — violet to deep navy */
   background:
-    radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95) 0%, rgba(127,255,138,0.6) 18%, rgba(0,229,255,0.35) 45%, rgba(124,92,255,0.25) 75%, transparent 100%),
-    radial-gradient(circle at 70% 80%, rgba(255,183,3,0.35), transparent 55%),
-    linear-gradient(135deg, rgba(0,229,255,0.55), rgba(124,92,255,0.65));
-  box-shadow:
-    inset 0 0 30px rgba(255, 255, 255, 0.25),
-    inset 0 -20px 30px rgba(124, 92, 255, 0.4),
-    0 0 30px rgba(0, 229, 255, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: aura-orb-breathe 3.4s ease-in-out infinite;
-}
-.aura-orb__label {
+    linear-gradient(180deg,
+      #2a1554 0%,
+      #3a1f6e 45%,
+      #2a1554 70%,
+      #0a0820 70%,
+      #050310 100%);
+  image-rendering: pixelated;
   font-family: var(--font-mono);
-  font-size: 1rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(5, 11, 31, 0.85);
-  text-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
-  user-select: none;
-  pointer-events: none;
+  isolation: isolate;
 }
-.aura-orb__ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 2px dashed rgba(0, 229, 255, 0.45);
-  animation: aura-orb-spin 14s linear infinite;
-}
-.aura-orb__ring::after {
+
+/* Soft pixel scanlines on the room */
+.aura-room::before {
   content: "";
   position: absolute;
-  inset: 4%;
-  border-radius: 50%;
-  border: 1px solid rgba(127, 255, 138, 0.35);
-  animation: aura-orb-spin 9s linear infinite reverse;
-}
-
-.aura-orb--pulse .aura-orb__core {
-  animation: aura-orb-pulse 0.35s ease-out;
-}
-
-@keyframes aura-orb-breathe {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.04); }
-}
-@keyframes aura-orb-spin {
-  to { transform: rotate(360deg); }
-}
-@keyframes aura-orb-pulse {
-  0%   { transform: scale(1); filter: brightness(1); }
-  50%  { transform: scale(1.12); filter: brightness(1.4); }
-  100% { transform: scale(1); filter: brightness(1); }
-}
-
-/* Floating +N pop text */
-.aura-pop-layer {
-  position: absolute;
   inset: 0;
   pointer-events: none;
-  overflow: visible;
-}
-.aura-pop {
-  position: absolute;
-  font-family: var(--font-mono);
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--accent-lime);
-  text-shadow: 0 0 8px rgba(127, 255, 138, 0.7), 0 0 14px rgba(127, 255, 138, 0.4);
-  transform: translate(-50%, -50%);
-  animation: aura-pop-float 1.05s ease-out forwards;
-  white-space: nowrap;
-  user-select: none;
-}
-@keyframes aura-pop-float {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
-  15%  { opacity: 1; transform: translate(-50%, -65%) scale(1.1); }
-  100% { opacity: 0; transform: translate(-50%, -150%) scale(1); }
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.0) 0,
+    rgba(0, 0, 0, 0.0) 2px,
+    rgba(0, 0, 0, 0.08) 3px
+  );
+  z-index: 2;
 }
 
-/* Sections */
-.aura-section {
+/* HUD inside room (level + coins) */
+.aura-room__hud {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  right: 0.6rem;
+  z-index: 5;
   display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-.aura-section__title {
+  justify-content: space-between;
+  align-items: center;
   font-family: var(--font-mono);
   font-size: 0.85rem;
+  color: var(--text);
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+.aura-room__level {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--accent-amber);
+  color: var(--accent-amber);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
   letter-spacing: 0.06em;
+}
+.aura-room__coins {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--accent-cyan);
   color: var(--accent-cyan);
-  text-transform: lowercase;
-  opacity: 0.9;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
 }
 
-/* Shop grid */
-.aura-shop {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.7rem;
+/* Floor */
+.aura-floor {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 30%;
+  z-index: 1;
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(255, 255, 255, 0.04) 0 18px,
+      transparent 18px 36px),
+    linear-gradient(180deg, #1a0a30 0%, #050310 100%);
+  border-top: 1px dashed rgba(255, 255, 255, 0.06);
 }
-.aura-item {
+
+/* Window decoration */
+.aura-window {
+  position: absolute;
+  top: 22%;
+  left: 36%;
+  width: 24%;
+  height: 32%;
+  z-index: 2;
+  border: 3px solid #1a0a30;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+}
+.aura-window__sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 75% 30%, rgba(255, 255, 255, 0.8) 0 4%, transparent 5%),
+    radial-gradient(circle at 30% 60%, rgba(255, 255, 255, 0.4) 0 8%, transparent 10%),
+    linear-gradient(180deg, #6cb0ff 0%, #a5d4ff 60%, #d0e8ff 100%);
+}
+.aura-window__cross {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 49%, #1a0a30 49% 51%, transparent 51%),
+    linear-gradient(180deg, transparent 49%, #1a0a30 49% 51%, transparent 51%);
+}
+
+/* Wall clock */
+.aura-clock {
+  position: absolute;
+  top: 14%;
+  right: 14%;
+  width: 38px;
+  height: 38px;
+  z-index: 2;
+  background: radial-gradient(circle, #f4e8d0 0 60%, #d4b8a0 62% 100%);
+  border-radius: 50%;
+  border: 2px solid #1a0a30;
+}
+.aura-clock__hand {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 40%;
+  background: #1a0a30;
+  transform-origin: top center;
+  transform: translate(-50%, 0) rotate(45deg);
+  animation: aura-clock-spin 60s linear infinite;
+}
+@keyframes aura-clock-spin {
+  to { transform: translate(-50%, 0) rotate(405deg); }
+}
+
+/* Shelf */
+.aura-shelf {
+  position: absolute;
+  top: 30%;
+  left: 8%;
+  width: 18%;
+  height: 26%;
+  z-index: 2;
+  background: linear-gradient(180deg, #4a2c80 0%, #2a1554 100%);
+  border: 2px solid #1a0a30;
+  border-radius: 2px;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  padding: 4px;
+}
+.aura-shelf__book {
+  width: 8px;
+  height: 70%;
+  border: 1px solid #1a0a30;
+  border-radius: 1px;
+}
+.aura-shelf__book--1 { background: #00e5ff; }
+.aura-shelf__book--2 { background: #ffb703; height: 55%; }
+.aura-shelf__book--3 { background: #7fff8a; height: 65%; }
+.aura-shelf__jar {
+  margin-left: auto;
+  width: 14px;
+  height: 18px;
+  background: radial-gradient(circle, #ff7a90 30%, #c4324d 100%);
+  border: 1px solid #1a0a30;
+  border-radius: 50% 50% 30% 30%;
+}
+
+/* Character canvas */
+.aura-character {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  transform: translateX(-50%);
+  width: 38%;
+  height: 70%;
+  z-index: 3;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Speech bubble */
+.aura-speech {
+  position: absolute;
+  z-index: 6;
+  bottom: 60%;
+  left: 50%;
+  transform: translate(-50%, 8px);
+  background: var(--bg-1);
+  border: 2px solid var(--accent-cyan);
+  border-radius: 8px;
+  padding: 0.35rem 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--accent-cyan);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+}
+.aura-speech::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid var(--accent-cyan);
+}
+.aura-speech--show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* Ad popups */
+.aura-ad-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+.aura-ad {
+  position: absolute;
+  pointer-events: auto;
+  width: 180px;
+  background: linear-gradient(135deg, #fff8e6 0%, #ffe6c7 100%);
+  border: 2px solid #ff5577;
+  border-radius: 4px;
+  padding: 0.45rem 0.55rem 0.45rem 0.55rem;
+  color: #1a0a30;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  line-height: 1.25;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  cursor: pointer;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 0.85rem;
-  padding: 0.7rem 0.9rem;
-  background: rgba(8, 18, 38, 0.55);
+  gap: 0.45rem;
+  transform: scale(0.6) rotate(var(--tilt, 0deg));
+  opacity: 0;
+  transition: transform 0.25s cubic-bezier(0.18, 1.4, 0.5, 1), opacity 0.2s ease;
+  animation: aura-ad-wiggle 1.6s ease-in-out infinite;
+}
+.aura-ad--in {
+  transform: scale(1) rotate(var(--tilt, 0deg));
+  opacity: 1;
+}
+.aura-ad--out {
+  transform: scale(0.5) rotate(var(--tilt, 0deg));
+  opacity: 0;
+}
+@keyframes aura-ad-wiggle {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.15); }
+}
+.aura-ad__bar {
+  background: #ff5577;
+  color: #fff;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.aura-ad__text {
+  font-weight: 600;
+  white-space: normal;
+  overflow: hidden;
+}
+.aura-ad__close {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid #1a0a30;
+  background: #fff;
+  color: #1a0a30;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.aura-ad__close:hover {
+  background: #ff5577;
+  color: #fff;
+  border-color: #ff5577;
+  box-shadow: none;
+}
+
+/* -------- ACTIONS row -------- */
+.aura-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+.aura-action {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem 0.85rem;
+  background: rgba(8, 18, 38, 0.65);
   border: 1px solid var(--card-border);
   border-radius: 10px;
   font-family: var(--font-mono);
   color: var(--text);
-  text-align: left;
   cursor: pointer;
   transition: transform 0.12s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  text-align: left;
 }
-.aura-item:hover {
+.aura-action:hover {
   background: rgba(0, 229, 255, 0.08);
   border-color: rgba(0, 229, 255, 0.55);
   box-shadow: 0 0 14px rgba(0, 229, 255, 0.18);
   transform: translateY(-1px);
 }
-.aura-item__icon {
-  font-size: 1.55rem;
+.aura-action__icon {
+  font-size: 1.5rem;
   line-height: 1;
 }
-.aura-item__body {
+.aura-action__text {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.1rem;
   min-width: 0;
 }
-.aura-item__name {
+.aura-action__label {
   font-size: 0.92rem;
   color: var(--text);
 }
-.aura-item__rate {
-  font-size: 0.75rem;
-  color: var(--text-dim);
-}
-.aura-item__meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.15rem;
-  min-width: 64px;
-}
-.aura-item__count {
+.aura-action__sub {
   font-size: 0.72rem;
-  color: var(--accent-violet);
-  letter-spacing: 0.04em;
-}
-.aura-item__cost {
-  font-size: 0.95rem;
-  color: var(--accent-amber);
-  font-variant-numeric: tabular-nums;
-}
-
-.aura-item--locked {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-.aura-item--locked:hover {
-  transform: none;
-  background: rgba(8, 18, 38, 0.55);
-  border-color: var(--card-border);
-  box-shadow: none;
-}
-.aura-item--locked .aura-item__cost {
   color: var(--text-dim);
 }
-
-.aura-item--bought {
-  border-color: rgba(127, 255, 138, 0.5);
-  background: rgba(127, 255, 138, 0.06);
-  cursor: default;
+.aura-action--feed { border-color: rgba(255, 183, 3, 0.45); }
+.aura-action--feed:hover {
+  background: rgba(255, 183, 3, 0.08);
+  border-color: var(--accent-amber);
+  box-shadow: 0 0 14px rgba(255, 183, 3, 0.25);
 }
-.aura-item--bought:hover {
-  transform: none;
-  background: rgba(127, 255, 138, 0.06);
-  box-shadow: none;
+.aura-action--play { border-color: rgba(127, 255, 138, 0.45); }
+.aura-action--play:hover {
+  background: rgba(127, 255, 138, 0.08);
+  border-color: var(--accent-lime);
+  box-shadow: 0 0 14px rgba(127, 255, 138, 0.25);
 }
-.aura-item--bought .aura-item__cost { color: var(--accent-lime); }
-.aura-item--bought .aura-item__count { color: var(--accent-lime); }
-
-.aura-item--shake {
-  animation: aura-item-shake 0.32s ease;
+.aura-action--shop { border-color: rgba(124, 92, 255, 0.45); }
+.aura-action--shop:hover {
+  background: rgba(124, 92, 255, 0.08);
+  border-color: var(--accent-violet);
+  box-shadow: 0 0 14px rgba(124, 92, 255, 0.25);
 }
-@keyframes aura-item-shake {
+.aura-action--ok  { animation: aura-flash-ok 0.36s ease; }
+.aura-action--bad { animation: aura-flash-bad 0.36s ease; }
+@keyframes aura-flash-ok {
+  0%, 100% { transform: translateY(0); }
+  30%      { transform: translateY(-3px); box-shadow: 0 0 22px rgba(127, 255, 138, 0.6); }
+}
+@keyframes aura-flash-bad {
   0%, 100% { transform: translateX(0); }
-  20%      { transform: translateX(-6px); }
-  40%      { transform: translateX(5px); }
-  60%      { transform: translateX(-3px); }
+  20%      { transform: translateX(-4px); }
+  40%      { transform: translateX(4px); }
+  60%      { transform: translateX(-2px); }
   80%      { transform: translateX(2px); }
 }
 
-/* Controls */
-.aura-controls {
+/* -------- RIGHT PANEL -------- */
+.aura-panel {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem;
-  margin-top: 0.5rem;
-}
-.aura-controls__hint {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-dim);
-  transition: color 0.2s ease;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-glow);
 }
 
-/* Mobile tuning */
-@media (max-width: 520px) {
-  .aura-stats {
-    grid-template-columns: 1fr 1fr;
+/* Vertical stat bars */
+.aura-bars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  align-items: end;
+}
+.aura-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+}
+.aura-bar__pct {
+  font-size: 0.78rem;
+  color: var(--accent-cyan);
+  font-variant-numeric: tabular-nums;
+}
+.aura-bar__track {
+  position: relative;
+  width: 26px;
+  height: 130px;
+  background: rgba(5, 11, 31, 0.7);
+  border: 2px solid #1a0f2e;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.aura-bar__fill {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 0%;
+  background: linear-gradient(180deg, var(--accent-cyan), #008fae);
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.25);
+  transition: height 0.4s ease, background 0.3s ease;
+}
+.aura-bar__fill--hunger { background: linear-gradient(180deg, #ffd95c, var(--accent-amber)); }
+.aura-bar__fill--fun    { background: linear-gradient(180deg, var(--accent-lime), #2eaa3a); }
+.aura-bar__fill--vibes  { background: linear-gradient(180deg, var(--accent-cyan), #008fae); }
+.aura-bar__fill--low {
+  background: linear-gradient(180deg, #ff6677, #aa2233) !important;
+  animation: aura-bar-warn 1.2s ease-in-out infinite;
+}
+@keyframes aura-bar-warn {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+.aura-bar__icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* Tips section */
+.aura-tips {
+  border-top: 1px dashed var(--card-border);
+  padding-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+}
+.aura-tips__title {
+  color: var(--accent-amber);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+}
+.aura-tips__info {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+.aura-tip {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-dim);
+  margin: 0;
+}
+.aura-tip strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.aura-reset {
+  margin-top: auto;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(255, 183, 3, 0.5);
+  background: transparent;
+  color: var(--accent-amber);
+  border-radius: 6px;
+  cursor: pointer;
+  align-self: flex-end;
+}
+.aura-reset:hover {
+  background: rgba(255, 183, 3, 0.1);
+  box-shadow: 0 0 12px rgba(255, 183, 3, 0.3);
+}
+
+/* -------- MOBILE -------- */
+@media (max-width: 720px) {
+  .aura-pet-game {
+    grid-template-columns: 1fr;
   }
-  .aura-stat--primary {
-    grid-column: 1 / -1;
+  .aura-panel {
+    order: 2;
   }
-  .aura-stat__value { font-size: 1.1rem; }
-  .aura-stat--primary .aura-stat__value { font-size: 1.7rem; }
-  .aura-item__name { font-size: 0.85rem; }
-  .aura-item__rate { font-size: 0.7rem; }
+  .aura-bars {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .aura-bar__track {
+    width: 22px;
+    height: 100px;
+  }
+  .aura-action__label { font-size: 0.85rem; }
+  .aura-action__sub   { font-size: 0.68rem; }
+  .aura-action__icon  { font-size: 1.3rem; }
+  .aura-ad { width: 150px; font-size: 0.7rem; }
+  .aura-clock { width: 28px; height: 28px; }
+  .aura-window { top: 18%; left: 32%; width: 28%; height: 38%; }
+  .aura-shelf { top: 28%; left: 6%; width: 22%; height: 30%; }
+}
+
+/* ============================================================
+   Mini Idle Aura — virtual pet room game
+   ============================================================ */
+.aura-pet-game {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+/* -------- ROOM -------- */
+.aura-room-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.aura-room {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-glow), inset 0 0 80px rgba(124, 92, 255, 0.15);
+  /* Wall gradient — violet to deep navy */
+  background:
+    linear-gradient(180deg,
+      #2a1554 0%,
+      #3a1f6e 45%,
+      #2a1554 70%,
+      #0a0820 70%,
+      #050310 100%);
+  image-rendering: pixelated;
+  font-family: var(--font-mono);
+  isolation: isolate;
+}
+
+/* Soft pixel scanlines on the room */
+.aura-room::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.0) 0,
+    rgba(0, 0, 0, 0.0) 2px,
+    rgba(0, 0, 0, 0.08) 3px
+  );
+  z-index: 2;
+}
+
+/* HUD inside room (level + coins) */
+.aura-room__hud {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  right: 0.6rem;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text);
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+.aura-room__level {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--accent-amber);
+  color: var(--accent-amber);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+}
+.aura-room__coins {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+/* Floor */
+.aura-floor {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 30%;
+  z-index: 1;
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(255, 255, 255, 0.04) 0 18px,
+      transparent 18px 36px),
+    linear-gradient(180deg, #1a0a30 0%, #050310 100%);
+  border-top: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+/* Window decoration */
+.aura-window {
+  position: absolute;
+  top: 22%;
+  left: 36%;
+  width: 24%;
+  height: 32%;
+  z-index: 2;
+  border: 3px solid #1a0a30;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+}
+.aura-window__sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 75% 30%, rgba(255, 255, 255, 0.8) 0 4%, transparent 5%),
+    radial-gradient(circle at 30% 60%, rgba(255, 255, 255, 0.4) 0 8%, transparent 10%),
+    linear-gradient(180deg, #6cb0ff 0%, #a5d4ff 60%, #d0e8ff 100%);
+}
+.aura-window__cross {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 49%, #1a0a30 49% 51%, transparent 51%),
+    linear-gradient(180deg, transparent 49%, #1a0a30 49% 51%, transparent 51%);
+}
+
+/* Wall clock */
+.aura-clock {
+  position: absolute;
+  top: 14%;
+  right: 14%;
+  width: 38px;
+  height: 38px;
+  z-index: 2;
+  background: radial-gradient(circle, #f4e8d0 0 60%, #d4b8a0 62% 100%);
+  border-radius: 50%;
+  border: 2px solid #1a0a30;
+}
+.aura-clock__hand {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 40%;
+  background: #1a0a30;
+  transform-origin: top center;
+  transform: translate(-50%, 0) rotate(45deg);
+  animation: aura-clock-spin 60s linear infinite;
+}
+@keyframes aura-clock-spin {
+  to { transform: translate(-50%, 0) rotate(405deg); }
+}
+
+/* Shelf */
+.aura-shelf {
+  position: absolute;
+  top: 30%;
+  left: 8%;
+  width: 18%;
+  height: 26%;
+  z-index: 2;
+  background: linear-gradient(180deg, #4a2c80 0%, #2a1554 100%);
+  border: 2px solid #1a0a30;
+  border-radius: 2px;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  padding: 4px;
+}
+.aura-shelf__book {
+  width: 8px;
+  height: 70%;
+  border: 1px solid #1a0a30;
+  border-radius: 1px;
+}
+.aura-shelf__book--1 { background: #00e5ff; }
+.aura-shelf__book--2 { background: #ffb703; height: 55%; }
+.aura-shelf__book--3 { background: #7fff8a; height: 65%; }
+.aura-shelf__jar {
+  margin-left: auto;
+  width: 14px;
+  height: 18px;
+  background: radial-gradient(circle, #ff7a90 30%, #c4324d 100%);
+  border: 1px solid #1a0a30;
+  border-radius: 50% 50% 30% 30%;
+}
+
+/* Character canvas */
+.aura-character {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  transform: translateX(-50%);
+  width: 38%;
+  height: 70%;
+  z-index: 3;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Speech bubble */
+.aura-speech {
+  position: absolute;
+  z-index: 6;
+  bottom: 60%;
+  left: 50%;
+  transform: translate(-50%, 8px);
+  background: var(--bg-1);
+  border: 2px solid var(--accent-cyan);
+  border-radius: 8px;
+  padding: 0.35rem 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--accent-cyan);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+}
+.aura-speech::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid var(--accent-cyan);
+}
+.aura-speech--show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* Ad popups */
+.aura-ad-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+.aura-ad {
+  position: absolute;
+  pointer-events: auto;
+  width: 180px;
+  background: linear-gradient(135deg, #fff8e6 0%, #ffe6c7 100%);
+  border: 2px solid #ff5577;
+  border-radius: 4px;
+  padding: 0.45rem 0.55rem 0.45rem 0.55rem;
+  color: #1a0a30;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  line-height: 1.25;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.45rem;
+  transform: scale(0.6) rotate(var(--tilt, 0deg));
+  opacity: 0;
+  transition: transform 0.25s cubic-bezier(0.18, 1.4, 0.5, 1), opacity 0.2s ease;
+  animation: aura-ad-wiggle 1.6s ease-in-out infinite;
+}
+.aura-ad--in {
+  transform: scale(1) rotate(var(--tilt, 0deg));
+  opacity: 1;
+}
+.aura-ad--out {
+  transform: scale(0.5) rotate(var(--tilt, 0deg));
+  opacity: 0;
+}
+@keyframes aura-ad-wiggle {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.15); }
+}
+.aura-ad__bar {
+  background: #ff5577;
+  color: #fff;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.aura-ad__text {
+  font-weight: 600;
+  white-space: normal;
+  overflow: hidden;
+}
+.aura-ad__close {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid #1a0a30;
+  background: #fff;
+  color: #1a0a30;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.aura-ad__close:hover {
+  background: #ff5577;
+  color: #fff;
+  border-color: #ff5577;
+  box-shadow: none;
+}
+
+/* -------- ACTIONS row -------- */
+.aura-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+.aura-action {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem 0.85rem;
+  background: rgba(8, 18, 38, 0.65);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  font-family: var(--font-mono);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  text-align: left;
+}
+.aura-action:hover {
+  background: rgba(0, 229, 255, 0.08);
+  border-color: rgba(0, 229, 255, 0.55);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.18);
+  transform: translateY(-1px);
+}
+.aura-action__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.aura-action__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.aura-action__label {
+  font-size: 0.92rem;
+  color: var(--text);
+}
+.aura-action__sub {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+.aura-action--feed { border-color: rgba(255, 183, 3, 0.45); }
+.aura-action--feed:hover {
+  background: rgba(255, 183, 3, 0.08);
+  border-color: var(--accent-amber);
+  box-shadow: 0 0 14px rgba(255, 183, 3, 0.25);
+}
+.aura-action--play { border-color: rgba(127, 255, 138, 0.45); }
+.aura-action--play:hover {
+  background: rgba(127, 255, 138, 0.08);
+  border-color: var(--accent-lime);
+  box-shadow: 0 0 14px rgba(127, 255, 138, 0.25);
+}
+.aura-action--shop { border-color: rgba(124, 92, 255, 0.45); }
+.aura-action--shop:hover {
+  background: rgba(124, 92, 255, 0.08);
+  border-color: var(--accent-violet);
+  box-shadow: 0 0 14px rgba(124, 92, 255, 0.25);
+}
+.aura-action--ok  { animation: aura-flash-ok 0.36s ease; }
+.aura-action--bad { animation: aura-flash-bad 0.36s ease; }
+@keyframes aura-flash-ok {
+  0%, 100% { transform: translateY(0); }
+  30%      { transform: translateY(-3px); box-shadow: 0 0 22px rgba(127, 255, 138, 0.6); }
+}
+@keyframes aura-flash-bad {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-4px); }
+  40%      { transform: translateX(4px); }
+  60%      { transform: translateX(-2px); }
+  80%      { transform: translateX(2px); }
+}
+
+/* -------- RIGHT PANEL -------- */
+.aura-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Vertical stat bars */
+.aura-bars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  align-items: end;
+}
+.aura-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+}
+.aura-bar__pct {
+  font-size: 0.78rem;
+  color: var(--accent-cyan);
+  font-variant-numeric: tabular-nums;
+}
+.aura-bar__track {
+  position: relative;
+  width: 26px;
+  height: 130px;
+  background: rgba(5, 11, 31, 0.7);
+  border: 2px solid #1a0f2e;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.aura-bar__fill {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 0%;
+  background: linear-gradient(180deg, var(--accent-cyan), #008fae);
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.25);
+  transition: height 0.4s ease, background 0.3s ease;
+}
+.aura-bar__fill--hunger { background: linear-gradient(180deg, #ffd95c, var(--accent-amber)); }
+.aura-bar__fill--fun    { background: linear-gradient(180deg, var(--accent-lime), #2eaa3a); }
+.aura-bar__fill--vibes  { background: linear-gradient(180deg, var(--accent-cyan), #008fae); }
+.aura-bar__fill--low {
+  background: linear-gradient(180deg, #ff6677, #aa2233) !important;
+  animation: aura-bar-warn 1.2s ease-in-out infinite;
+}
+@keyframes aura-bar-warn {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+.aura-bar__icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* Tips section */
+.aura-tips {
+  border-top: 1px dashed var(--card-border);
+  padding-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+}
+.aura-tips__title {
+  color: var(--accent-amber);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+}
+.aura-tips__info {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+.aura-tip {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-dim);
+  margin: 0;
+}
+.aura-tip strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.aura-reset {
+  margin-top: auto;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(255, 183, 3, 0.5);
+  background: transparent;
+  color: var(--accent-amber);
+  border-radius: 6px;
+  cursor: pointer;
+  align-self: flex-end;
+}
+.aura-reset:hover {
+  background: rgba(255, 183, 3, 0.1);
+  box-shadow: 0 0 12px rgba(255, 183, 3, 0.3);
+}
+
+/* -------- MOBILE -------- */
+@media (max-width: 720px) {
+  .aura-pet-game {
+    grid-template-columns: 1fr;
+  }
+  .aura-panel {
+    order: 2;
+  }
+  .aura-bars {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .aura-bar__track {
+    width: 22px;
+    height: 100px;
+  }
+  .aura-action__label { font-size: 0.85rem; }
+  .aura-action__sub   { font-size: 0.68rem; }
+  .aura-action__icon  { font-size: 1.3rem; }
+  .aura-ad { width: 150px; font-size: 0.7rem; }
+  .aura-clock { width: 28px; height: 28px; }
+  .aura-window { top: 18%; left: 32%; width: 28%; height: 38%; }
+  .aura-shelf { top: 28%; left: 6%; width: 22%; height: 30%; }
 }

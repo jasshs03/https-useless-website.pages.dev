@@ -1,348 +1,570 @@
-// Mini Idle Aura — a useless idle/incremental game.
-// You tap an orb, generate aura, buy weird generators, watch numbers grow.
-// All progress saves to localStorage. Offline gain is capped (no exploits).
+// Mini Idle Aura — a useless virtual pixel pet.
+// Feed Aura cookies, entertain her with games, swat random ad popups.
+// All stats slowly decay. She's never satisfied. Just like life.
 
-const STORAGE_KEY = 'useless-idle-aura-v1';
-const SAVE_INTERVAL_MS = 5000;
-const TICK_INTERVAL_MS = 100;     // 10 ticks/sec for smooth numbers
-const OFFLINE_CAP_SECONDS = 4 * 60 * 60; // 4 hours max offline gain
-const COST_SCALE = 1.15;
+const STORAGE_KEY = 'useless-idle-aura-pet-v1';
+const SAVE_EVERY_MS = 4000;
+const TICK_MS = 1000;            // 1 stat-decay tick per second
+const RENDER_MS = 80;            // ~12 fps render loop for character
+const OFFLINE_CAP_SEC = 60 * 60 * 4; // 4h max offline decay/gain
 
-// Generator definitions. Each generator can be bought many times; cost grows
-// by COST_SCALE per purchase. Rate is "aura per second" each unit produces.
-const GENERATORS = [
-  { id: 'moon',  icon: '🌙',  name: 'Moonbeam Whisper', baseCost: 5,        rate: 0.1 },
-  { id: 'crys',  icon: '🔮',  name: 'Crystal Hum',      baseCost: 50,       rate: 1 },
-  { id: 'cat',   icon: '🐈',  name: 'Mystic Cat Purr',  baseCost: 500,      rate: 8 },
-  { id: 'slime', icon: '🌌',  name: 'Cosmic Slime',     baseCost: 5000,     rate: 45 },
-  { id: 'spud',  icon: '🥔',  name: 'Sentient Potato',  baseCost: 50000,    rate: 250 },
-  { id: 'tach',  icon: '⚡',  name: 'Tachyon Ripple',   baseCost: 500000,   rate: 1400 },
-  { id: 'hole',  icon: '🕳️',  name: 'Black Hole',       baseCost: 5000000,  rate: 8000 },
-  { id: 'brain', icon: '🧠',  name: 'Galaxy Brain',     baseCost: 50000000, rate: 50000 },
+// --- decay rates (% per second) ---
+const DECAY = {
+  hunger: 0.18,
+  fun:    0.13,
+  vibes:  0.10, // baseline; goes higher when an ad is on screen
+};
+const VIBES_AD_PENALTY = 0.6; // extra %/sec while an ad is up
+
+// --- action effects ---
+const FEED_GAIN = 18;
+const PLAY_GAIN = 22;
+const AD_CLOSE_GAIN = 14;
+const FEED_COIN = 1;
+const PLAY_COIN = 3;
+const AD_COIN = 2;
+const PLAY_COOLDOWN_MS = 2200;
+const FEED_COOLDOWN_MS = 700;
+const COOKIE_PRICE = 10;
+const STARTING_COOKIES = 5;
+
+// --- xp / level ---
+const XP_PER_ACTION = 1;
+const XP_PER_LEVEL  = 25;
+
+// --- ad spawn config ---
+const AD_MIN_DELAY_MS = 22000;
+const AD_MAX_DELAY_MS = 48000;
+
+const AD_LINES = [
+  '🎰 YOU WON A POTATO!',
+  '💎 Buy crypto NOW!',
+  '🥔 Free WiFi — tap here!',
+  '🤑 Earn $1000/day!',
+  '💀 5 viruses detected!',
+  '🍪 Cookie sale — 99% off!',
+  '👽 Aliens hate this trick!',
+  '🎁 Claim your free reward!',
+  '🦷 Dentists fear this app!',
+  '🦄 Hot singles in your radius!',
+  '🔥 ONE WEIRD TIP YOU NEED!',
+  '📞 Your aunt is calling.',
 ];
 
-// Tap upgrades are one-time purchases that multiply your per-tap aura.
-const TAP_UPGRADES = [
-  { id: 'finger', icon: '🤏', name: 'Sharper Fingertip', cost: 100,     mult: 2 },
-  { id: 'lazer',  icon: '🔦', name: 'Lazer Tap',         cost: 5000,    mult: 5 },
-  { id: 'thumb',  icon: '👍', name: 'Cosmic Thumb',      cost: 500000,  mult: 4 },
-];
-
-// ----- state -----
-let state = {
-  aura: 0,
-  totalEarned: 0,
-  totalTaps: 0,
-  gens: {},   // id -> count
-  taps: {},   // id -> true if owned
-  lastSave: Date.now(),
+// --- speech lines (mood-based) ---
+const SPEECH = {
+  happy:  ['(♥‿♥)', 'vibes!', '*purr*', 'so full', 'wheeee'],
+  ok:     ['hmm', 'ok', 'mid', '...', 'meh'],
+  hungry: ['cookie?', '*tummy growls*', 'feed me', 'pls', 'starving'],
+  bored:  ['so bored', 'do something', '*yawn*', 'entertain me'],
+  ads:    ['UGH not again', 'close it!!', 'gross popup', 'tap the X', 'no thanks'],
 };
 
-// ----- helpers -----
+// ====================================================
+// PIXEL ART — Aura the pet
+// ====================================================
+// 20 wide x 26 tall, each char = one pixel. Rendered at SCALE px each.
+const PALETTE = {
+  '_': null,           // transparent
+  'k': '#1a0f2e',      // outline / hair dark
+  'h': '#3d2470',      // hair mid
+  'H': '#7c5cff',      // hair highlight (violet)
+  'g': '#7fff8a',      // bow / accent (lime)
+  's': '#f4e8d0',      // skin
+  'p': '#d4b8a0',      // skin shadow
+  'e': '#00e5ff',      // eye glow
+  'E': '#0099bb',      // eye shadow
+  'm': '#ff7a90',      // mouth
+  'd': '#2a0a3a',      // dress dark
+  'D': '#7c5cff',      // dress
+  'c': '#00e5ff',      // cyan accent
+  'B': '#0a0a18',      // boots
+};
+
+// Normal pose
+const POSE_IDLE = [
+  '____kkkkkkkkk_______',
+  '___khhhhhhhhhk______',
+  '__khHhHhHhHhHhk_____',
+  '__khgHhHhHhHHhk_____',
+  '_khHhssssssphHhk____',
+  '_khsssspssspsshk____',
+  '_khsseEeesseEeshk___',
+  '_khsseeEesseeEshk___',
+  '_khssssssssssssk____',
+  '_khsspssssspssshk___',
+  '__kssspsmmmpssssk___',
+  '__kssssspmpsssssk___',
+  '___kssssssssssk_____',
+  '____kkssssskk_______',
+  '______kkkk__________',
+  '____dDDDcDDDDd______',
+  '___dDDDDDDDDDDd_____',
+  '__dDDDDDDDDDDDDd____',
+  '__dDDDDcDDDcDDDd____',
+  '__dDDDDDDDDDDDDd____',
+  '__dDDDDDDDDDDDDd____',
+  '__dDDDDDDDDDDDDd____',
+  '___dDDDDDDDDDDd_____',
+  '____ddddddddd_______',
+  '_____BB___BB________',
+  '____BBB___BBB_______',
+];
+
+// Happy pose — eyes become ^ ^ shape, mouth smiles wider
+const POSE_HAPPY = POSE_IDLE.map((row, y) => {
+  if (y === 6) return '_khssEe__sseE___hk__';
+  if (y === 7) return '_khsseesssseesshk___';
+  if (y === 10) return '__kssspmmmmmpssssk__';
+  if (y === 11) return '__ksssspmmmpsssssk__';
+  return row;
+});
+
+// Sad pose — eyes droop, mouth frown
+const POSE_SAD = POSE_IDLE.map((row, y) => {
+  if (y === 6) return '_khssseeeesseessshk_';
+  if (y === 7) return '_khsssEEsssEEssshk__';
+  if (y === 10) return '__kssssspmpsssssk___';
+  if (y === 11) return '__ksspmmmsmmmpsssk__';
+  return row;
+});
+
+// Blink frame — eyes closed (replace eye rows with skin/dash)
+function blinkPose(base) {
+  const out = base.slice();
+  out[6] = '_khsssppppsppppshk__';
+  out[7] = '_khsssssssssssshk___';
+  return out;
+}
+
+// ====================================================
+// STATE
+// ====================================================
 function defaultState() {
   return {
-    aura: 0,
-    totalEarned: 0,
-    totalTaps: 0,
-    gens: {},
-    taps: {},
+    hunger: 75,
+    fun: 80,
+    vibes: 90,
+    coins: 0,
+    cookies: STARTING_COOKIES,
+    level: 1,
+    xp: 0,
     lastSave: Date.now(),
+    totalFeeds: 0,
+    totalPlays: 0,
+    totalAdsClosed: 0,
   };
 }
 
-function load() {
+let state = defaultState();
+
+function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultState();
-    const parsed = JSON.parse(raw);
+    const p = JSON.parse(raw);
     return {
-      aura: Number(parsed.aura) || 0,
-      totalEarned: Number(parsed.totalEarned) || 0,
-      totalTaps: Number(parsed.totalTaps) || 0,
-      gens: parsed.gens && typeof parsed.gens === 'object' ? parsed.gens : {},
-      taps: parsed.taps && typeof parsed.taps === 'object' ? parsed.taps : {},
-      lastSave: Number(parsed.lastSave) || Date.now(),
+      hunger: clamp(Number(p.hunger), 0, 100, 75),
+      fun:    clamp(Number(p.fun), 0, 100, 80),
+      vibes:  clamp(Number(p.vibes), 0, 100, 90),
+      coins:  Math.max(0, Math.floor(Number(p.coins) || 0)),
+      cookies: Math.max(0, Math.floor(Number(p.cookies) || 0)),
+      level:  Math.max(1, Math.floor(Number(p.level) || 1)),
+      xp:     Math.max(0, Math.floor(Number(p.xp) || 0)),
+      lastSave: Number(p.lastSave) || Date.now(),
+      totalFeeds: Math.max(0, Math.floor(Number(p.totalFeeds) || 0)),
+      totalPlays: Math.max(0, Math.floor(Number(p.totalPlays) || 0)),
+      totalAdsClosed: Math.max(0, Math.floor(Number(p.totalAdsClosed) || 0)),
     };
   } catch (e) {
     return defaultState();
   }
 }
 
-function save() {
+function saveState() {
   state.lastSave = Date.now();
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (e) { /* quota / privacy mode — ignore */ }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { /* ignore quota issues */ }
 }
 
-function genCost(g) {
-  const owned = state.gens[g.id] || 0;
-  return Math.ceil(g.baseCost * Math.pow(COST_SCALE, owned));
+function clamp(n, lo, hi, fallback = lo) {
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(hi, Math.max(lo, n));
 }
 
-function totalRate() {
-  let r = 0;
-  for (const g of GENERATORS) {
-    const owned = state.gens[g.id] || 0;
-    r += owned * g.rate;
-  }
-  return r;
+// ====================================================
+// DOM refs
+// ====================================================
+let canvas, ctx, room, adLayer, speechEl;
+let levelEl, coinsEl, cookiesEl;
+let barFill = {}, barPct = {};
+let actionBtns = {};
+let resetBtn;
+let activeAd = null;        // currently visible ad node
+let nextAdTimer = null;
+let lastPlayAt = 0, lastFeedAt = 0;
+let speechTimer = null;
+
+// ====================================================
+// Render — character
+// ====================================================
+let bobPhase = 0;
+let blinkUntil = 0;
+let nextBlinkAt = 0;
+let currentMood = 'ok';
+let SCALE = 5; // pixel scale, recalc on resize
+
+function resizeCanvas() {
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  canvas.width  = Math.floor(rect.width * dpr);
+  canvas.height = Math.floor(rect.height * dpr);
+  // Choose scale so 20px wide art fits with margin
+  SCALE = Math.max(3, Math.floor(canvas.width / 24));
+  ctx.imageSmoothingEnabled = false;
 }
 
-function tapPower() {
-  let p = 1;
-  for (const u of TAP_UPGRADES) {
-    if (state.taps[u.id]) p *= u.mult;
-  }
-  return p;
+function pickPose() {
+  // Mood from current stats; updated each render
+  const avg = (state.hunger + state.fun + state.vibes) / 3;
+  if (state.hunger < 25 || state.vibes < 20) return POSE_SAD;
+  if (avg > 75) return POSE_HAPPY;
+  return POSE_IDLE;
 }
 
-// Pretty number formatter: 1.2K, 4.5M, 1.23B, etc.
-function fmt(n) {
-  if (!isFinite(n)) return '∞';
-  if (n < 1000) {
-    if (n < 10) return n.toFixed(2);
-    if (n < 100) return n.toFixed(1);
-    return Math.floor(n).toString();
-  }
-  const units = ['K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
-  let u = -1;
-  let val = n;
-  while (val >= 1000 && u < units.length - 1) {
-    val /= 1000;
-    u++;
-  }
-  return val.toFixed(2) + units[u];
+function moodKey() {
+  if (state.hunger < 25) return 'hungry';
+  if (state.fun < 25)    return 'bored';
+  if (state.vibes < 25)  return 'ads';
+  const avg = (state.hunger + state.fun + state.vibes) / 3;
+  if (avg > 75) return 'happy';
+  return 'ok';
 }
 
-function fmtRate(n) {
-  if (n < 10) return n.toFixed(1);
-  return fmt(n);
-}
+function drawPose(pixels) {
+  if (!ctx) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const artW = 20 * SCALE;
+  const artH = pixels.length * SCALE;
+  const offX = Math.floor((canvas.width - artW) / 2);
+  const bob = Math.sin(bobPhase) > 0 ? 1 : 0;
+  const offY = Math.floor((canvas.height - artH) - 4) + bob * SCALE;
 
-// ----- rendering -----
-let totalEl, rateEl, tapEl, orbEl, popLayer, genShop, tapShop, resetBtn, savedHint;
+  // shadow oval under character
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  const shX = offX + artW / 2;
+  const shY = offY + artH + SCALE;
+  ctx.beginPath();
+  ctx.ellipse(shX, shY, artW * 0.32, SCALE * 0.9, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-function renderStats() {
-  totalEl.textContent = fmt(state.aura);
-  rateEl.textContent = fmtRate(totalRate());
-  tapEl.textContent = '+' + fmt(tapPower());
-}
-
-function buildShop() {
-  // Generators
-  genShop.innerHTML = '';
-  for (const g of GENERATORS) {
-    const item = document.createElement('button');
-    item.type = 'button';
-    item.className = 'aura-item';
-    item.dataset.kind = 'gen';
-    item.dataset.id = g.id;
-    item.innerHTML = `
-      <span class="aura-item__icon">${g.icon}</span>
-      <span class="aura-item__body">
-        <span class="aura-item__name">${g.name}</span>
-        <span class="aura-item__rate">+${fmtRate(g.rate)} /sec each</span>
-      </span>
-      <span class="aura-item__meta">
-        <span class="aura-item__count" data-count>×0</span>
-        <span class="aura-item__cost" data-cost>${fmt(g.baseCost)}</span>
-      </span>
-    `;
-    item.addEventListener('click', () => buyGen(g.id));
-    genShop.appendChild(item);
-  }
-
-  // Tap upgrades
-  tapShop.innerHTML = '';
-  for (const u of TAP_UPGRADES) {
-    const item = document.createElement('button');
-    item.type = 'button';
-    item.className = 'aura-item';
-    item.dataset.kind = 'tap';
-    item.dataset.id = u.id;
-    item.innerHTML = `
-      <span class="aura-item__icon">${u.icon}</span>
-      <span class="aura-item__body">
-        <span class="aura-item__name">${u.name}</span>
-        <span class="aura-item__rate">×${u.mult} tap power</span>
-      </span>
-      <span class="aura-item__meta">
-        <span class="aura-item__count" data-count>—</span>
-        <span class="aura-item__cost" data-cost>${fmt(u.cost)}</span>
-      </span>
-    `;
-    item.addEventListener('click', () => buyTap(u.id));
-    tapShop.appendChild(item);
+  for (let y = 0; y < pixels.length; y++) {
+    const row = pixels[y];
+    for (let x = 0; x < row.length; x++) {
+      const color = PALETTE[row[x]];
+      if (!color) continue;
+      ctx.fillStyle = color;
+      ctx.fillRect(offX + x * SCALE, offY + y * SCALE, SCALE, SCALE);
+    }
   }
 }
 
-function refreshShop() {
-  // Update each generator card affordability + cost + count
-  for (const g of GENERATORS) {
-    const node = genShop.querySelector(`[data-id="${g.id}"]`);
-    if (!node) continue;
-    const cost = genCost(g);
-    const owned = state.gens[g.id] || 0;
-    node.querySelector('[data-cost]').textContent = fmt(cost);
-    node.querySelector('[data-count]').textContent = '×' + owned;
-    node.classList.toggle('aura-item--locked', state.aura < cost);
+function renderCharacter(now) {
+  bobPhase += 0.06;
+  let pose = pickPose();
+  if (now < blinkUntil) pose = blinkPose(pose);
+  else if (now > nextBlinkAt) {
+    blinkUntil = now + 110;
+    nextBlinkAt = now + 2200 + Math.random() * 2500;
   }
-  // Update tap upgrades
-  for (const u of TAP_UPGRADES) {
-    const node = tapShop.querySelector(`[data-id="${u.id}"]`);
-    if (!node) continue;
-    const owned = !!state.taps[u.id];
-    node.classList.toggle('aura-item--bought', owned);
-    node.classList.toggle('aura-item--locked', !owned && state.aura < u.cost);
-    node.querySelector('[data-count]').textContent = owned ? 'owned' : '—';
-    if (owned) node.querySelector('[data-cost]').textContent = '✓';
-  }
+  drawPose(pose);
 }
 
-// ----- actions -----
-function buyGen(id) {
-  const g = GENERATORS.find(x => x.id === id);
-  if (!g) return;
-  const cost = genCost(g);
-  if (state.aura < cost) {
-    flashLocked(genShop.querySelector(`[data-id="${id}"]`));
+// ====================================================
+// Render — bars / HUD
+// ====================================================
+function renderHUD() {
+  if (levelEl)   levelEl.textContent = state.level;
+  if (coinsEl)   coinsEl.textContent = formatCoins(state.coins);
+  if (cookiesEl) cookiesEl.textContent = '×' + state.cookies + ' cookies';
+
+  setBar('hunger', state.hunger);
+  setBar('fun',    state.fun);
+  setBar('vibes',  state.vibes);
+}
+
+function setBar(stat, val) {
+  const f = barFill[stat], p = barPct[stat];
+  if (!f || !p) return;
+  const v = Math.max(0, Math.min(100, val));
+  f.style.height = v + '%';
+  p.textContent = Math.round(v) + '%';
+  f.classList.toggle('aura-bar__fill--low', v < 25);
+}
+
+function formatCoins(n) {
+  if (n < 1000) return n.toString().padStart(3, '0');
+  if (n < 1000000) return (n / 1000).toFixed(n < 10000 ? 1 : 0) + 'K';
+  return (n / 1000000).toFixed(2) + 'M';
+}
+
+// ====================================================
+// Speech bubble
+// ====================================================
+function say(text, ms = 1800) {
+  if (!speechEl) return;
+  speechEl.textContent = text;
+  speechEl.hidden = false;
+  speechEl.classList.remove('aura-speech--show');
+  void speechEl.offsetWidth;
+  speechEl.classList.add('aura-speech--show');
+  clearTimeout(speechTimer);
+  speechTimer = setTimeout(() => {
+    speechEl.classList.remove('aura-speech--show');
+    setTimeout(() => { if (speechEl) speechEl.hidden = true; }, 250);
+  }, ms);
+}
+
+function moodSay() {
+  const arr = SPEECH[moodKey()] || SPEECH.ok;
+  say(arr[Math.floor(Math.random() * arr.length)]);
+}
+
+// ====================================================
+// Actions
+// ====================================================
+function doFeed() {
+  const now = performance.now();
+  if (now - lastFeedAt < FEED_COOLDOWN_MS) return;
+  if (state.cookies <= 0) { say('out of cookies!'); flash('feed', false); return; }
+  lastFeedAt = now;
+  state.cookies -= 1;
+  state.hunger = Math.min(100, state.hunger + FEED_GAIN);
+  state.coins  += FEED_COIN;
+  state.totalFeeds += 1;
+  awardXP(1);
+  flash('feed', true);
+  say('*munch*');
+  renderHUD();
+  saveState();
+}
+
+function doPlay() {
+  const now = performance.now();
+  if (now - lastPlayAt < PLAY_COOLDOWN_MS) return;
+  lastPlayAt = now;
+  state.fun = Math.min(100, state.fun + PLAY_GAIN);
+  state.coins += PLAY_COIN;
+  state.totalPlays += 1;
+  awardXP(1);
+  flash('play', true);
+  say('wheee!');
+  renderHUD();
+  saveState();
+}
+
+function doShop() {
+  if (state.coins < COOKIE_PRICE) {
+    say('need ' + COOKIE_PRICE + ' coins');
+    flash('shop', false);
     return;
   }
-  state.aura -= cost;
-  state.gens[id] = (state.gens[id] || 0) + 1;
-  renderStats();
-  refreshShop();
-  save();
+  state.coins -= COOKIE_PRICE;
+  state.cookies += 1;
+  flash('shop', true);
+  say('+1 cookie');
+  renderHUD();
+  saveState();
 }
 
-function buyTap(id) {
-  const u = TAP_UPGRADES.find(x => x.id === id);
-  if (!u) return;
-  if (state.taps[id]) return;
-  if (state.aura < u.cost) {
-    flashLocked(tapShop.querySelector(`[data-id="${id}"]`));
+function awardXP(amount) {
+  state.xp += amount;
+  while (state.xp >= XP_PER_LEVEL * state.level) {
+    state.xp -= XP_PER_LEVEL * state.level;
+    state.level += 1;
+    say('LEVEL UP! 🎉', 2400);
+  }
+}
+
+function flash(action, ok) {
+  const btn = actionBtns[action];
+  if (!btn) return;
+  btn.classList.remove('aura-action--ok', 'aura-action--bad');
+  void btn.offsetWidth;
+  btn.classList.add(ok ? 'aura-action--ok' : 'aura-action--bad');
+  setTimeout(() => {
+    btn.classList.remove('aura-action--ok', 'aura-action--bad');
+  }, 360);
+}
+
+// ====================================================
+// Ad popups
+// ====================================================
+function scheduleNextAd() {
+  clearTimeout(nextAdTimer);
+  const delay = AD_MIN_DELAY_MS + Math.random() * (AD_MAX_DELAY_MS - AD_MIN_DELAY_MS);
+  nextAdTimer = setTimeout(spawnAd, delay);
+}
+
+function spawnAd() {
+  if (!adLayer || activeAd) {
+    // already one up — try again later
+    scheduleNextAd();
     return;
   }
-  state.aura -= u.cost;
-  state.taps[id] = true;
-  renderStats();
-  refreshShop();
-  save();
+  const ad = document.createElement('div');
+  ad.className = 'aura-ad';
+  const text = AD_LINES[Math.floor(Math.random() * AD_LINES.length)];
+  ad.innerHTML = `
+    <span class="aura-ad__bar">⚠ AD</span>
+    <span class="aura-ad__text">${text}</span>
+    <button class="aura-ad__close" type="button" aria-label="Close ad">×</button>
+  `;
+  // Random position within the room (relative to ad layer)
+  const layerRect = adLayer.getBoundingClientRect();
+  const adW = 180, adH = 64;
+  const padX = 12, padY = 36;
+  const maxX = Math.max(0, layerRect.width  - adW - padX * 2);
+  const maxY = Math.max(0, layerRect.height - adH - padY * 2);
+  ad.style.left = (padX + Math.random() * maxX) + 'px';
+  ad.style.top  = (padY + Math.random() * maxY) + 'px';
+  // Random tilt
+  const tilt = (Math.random() * 8 - 4).toFixed(1);
+  ad.style.setProperty('--tilt', tilt + 'deg');
+  adLayer.appendChild(ad);
+  activeAd = ad;
+  // Hide after entry animation
+  requestAnimationFrame(() => ad.classList.add('aura-ad--in'));
+
+  ad.querySelector('.aura-ad__close').addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeAd(ad, true);
+  });
+  // Clicking the ad itself does nothing useful (it's an ad)
+  ad.addEventListener('click', () => say('tap the X →'));
+  moodSay();
 }
 
-function flashLocked(node) {
-  if (!node) return;
-  node.classList.remove('aura-item--shake');
-  void node.offsetWidth;
-  node.classList.add('aura-item--shake');
-}
-
-function spawnPop(x, y, amount) {
-  if (!popLayer) return;
-  const pop = document.createElement('span');
-  pop.className = 'aura-pop';
-  pop.textContent = '+' + fmt(amount);
-  // Random horizontal jitter so multiple pops fan out
-  const jitter = (Math.random() - 0.5) * 30;
-  pop.style.left = (x + jitter) + 'px';
-  pop.style.top = y + 'px';
-  popLayer.appendChild(pop);
-  // Cleanup after animation
-  setTimeout(() => pop.remove(), 1100);
-}
-
-function handleTap(ev) {
-  const power = tapPower();
-  state.aura += power;
-  state.totalEarned += power;
-  state.totalTaps += 1;
-  renderStats();
-  refreshShop();
-
-  // Pop animation positioned relative to the orb wrap
-  const wrap = popLayer.parentElement;
-  const rect = wrap.getBoundingClientRect();
-  const x = (ev.clientX || (rect.left + rect.width / 2)) - rect.left;
-  const y = (ev.clientY || (rect.top + rect.height / 2)) - rect.top;
-  spawnPop(x, y, power);
-
-  // Orb pulse
-  orbEl.classList.remove('aura-orb--pulse');
-  void orbEl.offsetWidth;
-  orbEl.classList.add('aura-orb--pulse');
-}
-
-function tick() {
-  const gained = totalRate() * (TICK_INTERVAL_MS / 1000);
-  if (gained > 0) {
-    state.aura += gained;
-    state.totalEarned += gained;
-    renderStats();
-    refreshShop();
+function closeAd(ad, byUser) {
+  if (!ad) return;
+  ad.classList.add('aura-ad--out');
+  setTimeout(() => { if (ad.parentNode) ad.parentNode.removeChild(ad); }, 250);
+  if (activeAd === ad) activeAd = null;
+  if (byUser) {
+    state.vibes = Math.min(100, state.vibes + AD_CLOSE_GAIN);
+    state.coins += AD_COIN;
+    state.totalAdsClosed += 1;
+    awardXP(1);
+    say('+' + AD_CLOSE_GAIN + ' vibes');
+    renderHUD();
+    saveState();
   }
+  scheduleNextAd();
 }
 
+// ====================================================
+// Tick — decay
+// ====================================================
+function tick(deltaSec) {
+  state.hunger = Math.max(0, state.hunger - DECAY.hunger * deltaSec);
+  state.fun    = Math.max(0, state.fun    - DECAY.fun    * deltaSec);
+  let vDecay = DECAY.vibes;
+  if (activeAd) vDecay += VIBES_AD_PENALTY;
+  state.vibes  = Math.max(0, state.vibes  - vDecay * deltaSec);
+  renderHUD();
+}
+
+// ====================================================
+// Reset
+// ====================================================
 function resetGame() {
-  const ok = window.confirm('really reset your aura? all progress will vanish into the void.');
-  if (!ok) return;
+  if (!window.confirm('reset Aura back to nothing? her trauma stays though.')) return;
   state = defaultState();
-  save();
-  renderStats();
-  refreshShop();
-  if (savedHint) {
-    savedHint.textContent = 'wiped. back to nothing.';
-    setTimeout(() => { savedHint.textContent = 'auto-saves to your browser'; }, 2500);
-  }
+  if (activeAd) closeAd(activeAd, false);
+  renderHUD();
+  saveState();
+  say('rebooted.', 1500);
 }
 
-// ----- bootstrap -----
+// ====================================================
+// Boot
+// ====================================================
 export function initIdleAura() {
-  totalEl = document.getElementById('aura-total');
-  rateEl = document.getElementById('aura-rate');
-  tapEl = document.getElementById('aura-tap');
-  orbEl = document.getElementById('aura-orb');
-  popLayer = document.getElementById('aura-pop-layer');
-  genShop = document.getElementById('aura-generators');
-  tapShop = document.getElementById('aura-tap-upgrades');
+  canvas   = document.getElementById('aura-character');
+  if (!canvas) return; // not on idle-aura page
+
+  ctx      = canvas.getContext('2d');
+  room     = document.getElementById('aura-room');
+  adLayer  = document.getElementById('aura-ad-layer');
+  speechEl = document.getElementById('aura-speech');
+  levelEl  = document.getElementById('aura-level');
+  coinsEl  = document.getElementById('aura-coins');
+  cookiesEl= document.getElementById('aura-cookies');
   resetBtn = document.getElementById('aura-reset');
-  savedHint = document.getElementById('aura-saved');
 
-  // No-op if not on the idle-aura page.
-  if (!orbEl || !genShop || !tapShop) return;
+  ['hunger', 'fun', 'vibes'].forEach((s) => {
+    barFill[s] = document.getElementById('bar-' + s + '-fill');
+    barPct[s]  = document.getElementById('bar-' + s + '-pct');
+  });
 
-  // Load saved state and grant offline gain.
-  state = load();
+  document.querySelectorAll('[data-action]').forEach((btn) => {
+    actionBtns[btn.dataset.action] = btn;
+  });
+
+  // Wire actions
+  if (actionBtns.feed) actionBtns.feed.addEventListener('click', doFeed);
+  if (actionBtns.play) actionBtns.play.addEventListener('click', doPlay);
+  if (actionBtns.shop) actionBtns.shop.addEventListener('click', doShop);
+  if (resetBtn) resetBtn.addEventListener('click', resetGame);
+
+  // Load state and apply offline decay
+  state = loadState();
   const now = Date.now();
-  const offlineSec = Math.min((now - state.lastSave) / 1000, OFFLINE_CAP_SECONDS);
-  const offlineGain = totalRate() * Math.max(offlineSec, 0);
-  if (offlineGain > 0) {
-    state.aura += offlineGain;
-    state.totalEarned += offlineGain;
-    // Tiny welcome-back message via the saved hint
-    setTimeout(() => {
-      if (savedHint) {
-        savedHint.textContent = `welcome back — you idled +${fmt(offlineGain)} aura`;
-        setTimeout(() => { savedHint.textContent = 'auto-saves to your browser'; }, 4500);
-      }
-    }, 200);
+  const offline = Math.min((now - state.lastSave) / 1000, OFFLINE_CAP_SEC);
+  if (offline > 0) {
+    state.hunger = Math.max(0, state.hunger - DECAY.hunger * offline);
+    state.fun    = Math.max(0, state.fun    - DECAY.fun    * offline);
+    state.vibes  = Math.max(0, state.vibes  - DECAY.vibes  * offline);
+    if (offline > 30) {
+      setTimeout(() => say('you left me for ' + Math.round(offline / 60) + ' min!', 2400), 600);
+    }
   }
   state.lastSave = now;
 
-  buildShop();
-  renderStats();
-  refreshShop();
+  // Initial render
+  resizeCanvas();
+  renderHUD();
 
-  orbEl.addEventListener('click', handleTap);
-  resetBtn.addEventListener('click', resetGame);
+  // Render loop
+  let lastTick = performance.now();
+  function loop() {
+    const t = performance.now();
+    renderCharacter(t);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
 
-  // Game loop
-  setInterval(tick, TICK_INTERVAL_MS);
-  setInterval(save, SAVE_INTERVAL_MS);
+  // Stat decay tick
+  setInterval(() => {
+    tick(TICK_MS / 1000);
+  }, TICK_MS);
 
-  // Save when the user navigates away or hides the tab
+  // Periodic save
+  setInterval(saveState, SAVE_EVERY_MS);
+
+  // Resize handling
+  window.addEventListener('resize', resizeCanvas);
+
+  // Schedule the first ad
+  scheduleNextAd();
+
+  // Save on hide/unload
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') save();
+    if (document.visibilityState === 'hidden') saveState();
   });
-  window.addEventListener('beforeunload', save);
+  window.addEventListener('beforeunload', saveState);
+
+  // Welcome message
+  setTimeout(moodSay, 400);
 }

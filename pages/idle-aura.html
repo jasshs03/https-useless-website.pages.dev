@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>idle aura — useless.exe</title>
-    <meta name="description" content="A tiny idle game where you accumulate meaningless aura by tapping an orb and buying weird generators." />
+    <meta name="description" content="Feed Aura cookies, entertain her with games, and close pesky ad popups. A useless pixel pet you can never actually finish." />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="idle aura — useless.exe" />
-    <meta property="og:description" content="Tap. Buy mystic cats. Watch numbers go brrr." />
+    <meta property="og:description" content="Feed Aura. Entertain Aura. Close ads. Forever." />
     <meta property="og:image" content="/og-image.svg" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#050b1f" />
@@ -26,56 +26,110 @@
 
     <header class="site-header">
       <h1 class="brand"><span class="bracket">[</span>idle aura<span class="bracket">]</span></h1>
-      <p class="tagline">accumulate meaningless energy<span class="cursor">_</span></p>
+      <p class="tagline">feed her. amuse her. swat the ads.<span class="cursor">_</span></p>
     </header>
 
     <main>
-      <section class="aura-game">
+      <section class="aura-pet-game">
 
-        <!-- Top stats row -->
-        <div class="aura-stats">
-          <div class="aura-stat aura-stat--primary">
-            <span class="aura-stat__label">total aura</span>
-            <span class="aura-stat__value" id="aura-total">0</span>
+        <!-- LEFT: ROOM + ACTIONS -->
+        <div class="aura-room-wrap">
+          <div class="aura-room" id="aura-room">
+            <!-- Top HUD inside the room -->
+            <div class="aura-room__hud">
+              <span class="aura-room__level">LV<span id="aura-level">1</span></span>
+              <span class="aura-room__coins">🪙 <span id="aura-coins">0</span></span>
+            </div>
+
+            <!-- Wall decorations -->
+            <div class="aura-window" aria-hidden="true">
+              <div class="aura-window__sky"></div>
+              <div class="aura-window__cross"></div>
+            </div>
+            <div class="aura-clock" aria-hidden="true">
+              <span class="aura-clock__hand"></span>
+            </div>
+            <div class="aura-shelf" aria-hidden="true">
+              <span class="aura-shelf__book aura-shelf__book--1"></span>
+              <span class="aura-shelf__book aura-shelf__book--2"></span>
+              <span class="aura-shelf__book aura-shelf__book--3"></span>
+              <span class="aura-shelf__jar"></span>
+            </div>
+
+            <!-- The character canvas -->
+            <canvas class="aura-character" id="aura-character" width="120" height="160" aria-label="Aura the pixel pet"></canvas>
+
+            <!-- Speech bubble (status message) -->
+            <div class="aura-speech" id="aura-speech" hidden></div>
+
+            <!-- Ad popup layer -->
+            <div class="aura-ad-layer" id="aura-ad-layer" aria-live="polite" aria-label="Annoying ad popups"></div>
+
+            <!-- Floor stripe -->
+            <div class="aura-floor" aria-hidden="true"></div>
           </div>
-          <div class="aura-stat">
-            <span class="aura-stat__label">per second</span>
-            <span class="aura-stat__value aura-stat__value--rate" id="aura-rate">0.0</span>
+
+          <!-- Action buttons -->
+          <div class="aura-actions">
+            <button class="aura-action aura-action--feed" data-action="feed" type="button">
+              <span class="aura-action__icon">🍪</span>
+              <span class="aura-action__text">
+                <span class="aura-action__label">Feed</span>
+                <span class="aura-action__sub" id="aura-cookies">×5 cookies</span>
+              </span>
+            </button>
+            <button class="aura-action aura-action--play" data-action="play" type="button">
+              <span class="aura-action__icon">🎮</span>
+              <span class="aura-action__text">
+                <span class="aura-action__label">Play</span>
+                <span class="aura-action__sub">+fun</span>
+              </span>
+            </button>
+            <button class="aura-action aura-action--shop" data-action="shop" type="button">
+              <span class="aura-action__icon">🛒</span>
+              <span class="aura-action__text">
+                <span class="aura-action__label">Buy</span>
+                <span class="aura-action__sub">10🪙 → 1🍪</span>
+              </span>
+            </button>
           </div>
-          <div class="aura-stat">
-            <span class="aura-stat__label">per tap</span>
-            <span class="aura-stat__value aura-stat__value--tap" id="aura-tap">+1</span>
+        </div>
+
+        <!-- RIGHT: STATS + TIPS -->
+        <aside class="aura-panel">
+          <div class="aura-bars">
+            <div class="aura-bar" data-stat="hunger">
+              <span class="aura-bar__pct" id="bar-hunger-pct">75%</span>
+              <div class="aura-bar__track">
+                <div class="aura-bar__fill aura-bar__fill--hunger" id="bar-hunger-fill"></div>
+              </div>
+              <span class="aura-bar__icon">🍪</span>
+            </div>
+            <div class="aura-bar" data-stat="fun">
+              <span class="aura-bar__pct" id="bar-fun-pct">80%</span>
+              <div class="aura-bar__track">
+                <div class="aura-bar__fill aura-bar__fill--fun" id="bar-fun-fill"></div>
+              </div>
+              <span class="aura-bar__icon">🎮</span>
+            </div>
+            <div class="aura-bar" data-stat="vibes">
+              <span class="aura-bar__pct" id="bar-vibes-pct">90%</span>
+              <div class="aura-bar__track">
+                <div class="aura-bar__fill aura-bar__fill--vibes" id="bar-vibes-fill"></div>
+              </div>
+              <span class="aura-bar__icon">📢</span>
+            </div>
           </div>
-        </div>
 
-        <!-- The Orb -->
-        <div class="aura-orb-wrap">
-          <button class="aura-orb" id="aura-orb" type="button" aria-label="Tap the aura orb to gain aura">
-            <span class="aura-orb__ring"></span>
-            <span class="aura-orb__core">
-              <span class="aura-orb__label">tap</span>
-            </span>
-          </button>
-          <div class="aura-pop-layer" id="aura-pop-layer" aria-hidden="true"></div>
-        </div>
+          <div class="aura-tips">
+            <h3 class="aura-tips__title">Tips <span class="aura-tips__info">ⓘ</span></h3>
+            <p class="aura-tip">Feed Aura <strong>cookies</strong> to fill 🍪</p>
+            <p class="aura-tip">Entertain Aura with <strong>games</strong> 🎮</p>
+            <p class="aura-tip">Close <strong>ads</strong> when they pop up 📢</p>
+          </div>
 
-        <!-- Generators -->
-        <div class="aura-section">
-          <h3 class="aura-section__title">// generators</h3>
-          <div class="aura-shop" id="aura-generators"></div>
-        </div>
-
-        <!-- Tap upgrades -->
-        <div class="aura-section">
-          <h3 class="aura-section__title">// tap power</h3>
-          <div class="aura-shop" id="aura-tap-upgrades"></div>
-        </div>
-
-        <!-- Controls -->
-        <div class="aura-controls">
-          <button class="btn btn-amber" id="aura-reset" type="button">reset aura</button>
-          <span class="aura-controls__hint" id="aura-saved">auto-saves to your browser</span>
-        </div>
+          <button class="aura-reset" id="aura-reset" type="button">reset save</button>
+        </aside>
 
       </section>
     </main>
