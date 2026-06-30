@@ -61,79 +61,79 @@ const SPEECH = {
 };
 
 // ====================================================
-// PIXEL ART — Aura the pet
+// PIXEL ART — Aura the cat
 // ====================================================
 // 20 wide x 26 tall, each char = one pixel. Rendered at SCALE px each.
 const PALETTE = {
   '_': null,           // transparent
-  'k': '#1a0f2e',      // outline / hair dark
-  'h': '#3d2470',      // hair mid
-  'H': '#7c5cff',      // hair highlight (violet)
-  'g': '#7fff8a',      // bow / accent (lime)
-  's': '#f4e8d0',      // skin
-  'p': '#d4b8a0',      // skin shadow
-  'e': '#00e5ff',      // eye glow
-  'E': '#0099bb',      // eye shadow
+  'k': '#1a0f2e',      // outline / dark fur
+  'h': '#5a3a82',      // fur shadow / stripes
+  'H': '#b9a8e6',      // main fur (lavender)
+  'g': '#7fff8a',      // collar accent (lime)
+  's': '#ffc2d4',      // inner ear / nose pink
+  'p': '#d49bb8',      // pink shadow
+  'e': '#00e5ff',      // eye glow (cyan)
+  'E': '#0099bb',      // eye shadow / pupil
   'm': '#ff7a90',      // mouth
-  'd': '#2a0a3a',      // dress dark
-  'D': '#7c5cff',      // dress
-  'c': '#00e5ff',      // cyan accent
-  'B': '#0a0a18',      // boots
+  'd': '#2a0a3a',      // dark accent
+  'D': '#7c5cff',      // violet accent
+  'c': '#00e5ff',      // cyan collar bell
+  'B': '#0a0a18',      // paw pads / boots
 };
 
-// Normal pose
+// Normal pose — sitting cat facing forward
 const POSE_IDLE = [
-  '____kkkkkkkkk_______',
-  '___khhhhhhhhhk______',
-  '__khHhHhHhHhHhk_____',
-  '__khgHhHhHhHHhk_____',
-  '_khHhssssssphHhk____',
-  '_khsssspssspsshk____',
-  '_khsseEeesseEeshk___',
-  '_khsseeEesseeEshk___',
-  '_khssssssssssssk____',
-  '_khsspssssspssshk___',
-  '__kssspsmmmpssssk___',
-  '__kssssspmpsssssk___',
-  '___kssssssssssk_____',
-  '____kkssssskk_______',
-  '______kkkk__________',
-  '____dDDDcDDDDd______',
-  '___dDDDDDDDDDDd_____',
-  '__dDDDDDDDDDDDDd____',
-  '__dDDDDcDDDcDDDd____',
-  '__dDDDDDDDDDDDDd____',
-  '__dDDDDDDDDDDDDd____',
-  '__dDDDDDDDDDDDDd____',
-  '___dDDDDDDDDDDd_____',
-  '____ddddddddd_______',
-  '_____BB___BB________',
-  '____BBB___BBB_______',
+  '__kk_________kk_____', //  0 ear tips
+  '_kHHk_______kHHk____', //  1 ears
+  '_kHsHk_____kHsHk____', //  2 ears with pink inside
+  '_kHsHHkkkkkHHsHk____', //  3 ears merge into head
+  '_kHHHHHHHHHHHHHHk___', //  4 top of head
+  '__kHHHHHHHHHHHHHk___', //  5 head
+  '__kHHeeHHHHHHeeHHk__', //  6 eyes
+  '__kHHEEHHHHHHEEHHk__', //  7 eye shadow / pupil bottom
+  '__kHHHHHHmmHHHHHHk__', //  8 nose
+  '__kHhHHHHmmHHHHhHk__', //  9 whiskers + mouth
+  '__kHHHHHHmmHHHHHHk__', // 10 mouth (overridden)
+  '__kHHHHHHHHHHHHHHk__', // 11 chin (overridden)
+  '___kHHHHHHHHHHHHk___', // 12 chin narrows
+  '____kHHHHHHHHHHk____', // 13 neck
+  '____kHHHHHHHHHHk____', // 14 chest
+  '___kHHHHHcHHHHHHk___', // 15 collar with bell
+  '__kHHHHHHHHHHHHHHk__', // 16 body
+  '__kHHHHHHHHHHHHHHk__', // 17 body
+  '__kHHHHHHHHHHHHHHk__', // 18 body
+  '__kHHHHHHHHHHHHHHk__', // 19 body
+  '__kHHHHHHHHHHHHHHk__', // 20 body
+  '_kHHHHHHHHHHHHHHHHk_', // 21 body widens
+  '_kHHHHHHHHHHHHHHHHk_', // 22 bottom of body
+  '_kHHkkkHHHHHHkkkHHk_', // 23 paws gap
+  '_kkBBkHHHHHHHHkBBkk_', // 24 paw pads
+  '__kkk__________kkk__', // 25 toe edges
 ];
 
-// Happy pose — eyes become ^ ^ shape, mouth smiles wider
+// Happy pose — eyes squint into ^ ^ shape, mouth widens into a smile
 const POSE_HAPPY = POSE_IDLE.map((row, y) => {
-  if (y === 6) return '_khssEe__sseE___hk__';
-  if (y === 7) return '_khsseesssseesshk___';
-  if (y === 10) return '__kssspmmmmmpssssk__';
-  if (y === 11) return '__ksssspmmmpsssssk__';
+  if (y === 6)  return '__kHHkkHHHHHHkkHHk__'; // closed-curve happy eyes
+  if (y === 7)  return '__kHHHHHHHHHHHHHHk__'; // clear under eyes
+  if (y === 10) return '__kHHHHmmmmmmHHHHk__'; // wide smile
+  if (y === 11) return '__kHHHHHmmmmHHHHHk__'; // smile curve
   return row;
 });
 
-// Sad pose — eyes droop, mouth frown
+// Sad pose — eyes droop, mouth frowns
 const POSE_SAD = POSE_IDLE.map((row, y) => {
-  if (y === 6) return '_khssseeeesseessshk_';
-  if (y === 7) return '_khsssEEsssEEssshk__';
-  if (y === 10) return '__kssssspmpsssssk___';
-  if (y === 11) return '__ksspmmmsmmmpsssk__';
+  if (y === 6)  return '__kHHEEHHHHHHEEHHk__'; // dark heavy eyes
+  if (y === 7)  return '__kHHeeHHHHHHeeHHk__'; // tears beneath
+  if (y === 10) return '__kHHHHHmmmmHHHHHk__'; // wider mouth line
+  if (y === 11) return '__kHHHmHHHHHHHHmHHk_'; // frown corners
   return row;
 });
 
-// Blink frame — eyes closed (replace eye rows with skin/dash)
+// Blink frame — eyes closed (replace eye rows with thin fur lines)
 function blinkPose(base) {
   const out = base.slice();
-  out[6] = '_khsssppppsppppshk__';
-  out[7] = '_khsssssssssssshk___';
+  out[6] = '__kHHhhHHHHHHhhHHk__';
+  out[7] = '__kHHHHHHHHHHHHHHk__';
   return out;
 }
 
