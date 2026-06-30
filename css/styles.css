@@ -590,72 +590,51 @@ body.modal-open { overflow: hidden; }
 }
 
 /* ============================================================
-   Fun Fact widget (top-right)
+   Fun Fact (top-right) — mirrors .site-credit style on the left
    ============================================================ */
 .fun-fact {
   position: fixed;
-  top: 0.85rem;
-  right: 0.9rem;
+  top: 0.9rem;
+  right: 1.1rem;
   z-index: 5;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  align-items: flex-end;
-  padding: 0.55rem 0.8rem;
-  border: 1px solid var(--card-border);
-  border-radius: 8px;
-  background: rgba(8, 18, 38, 0.7);
-  backdrop-filter: blur(6px);
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  line-height: 1.35;
-  color: var(--text);
-  text-align: right;
-  max-width: min(92vw, 320px);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
   pointer-events: none;
   user-select: none;
-}
-.fun-fact__label {
-  color: var(--accent-amber);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-shadow: 0 0 8px rgba(255, 183, 3, 0.4);
-}
-.fun-fact__line {
-  color: var(--text-dim);
   white-space: nowrap;
 }
-.fun-fact__date {
-  color: var(--text);
-}
-.fun-fact__num {
+.fun-fact .label  { color: var(--accent-amber); }
+.fun-fact .sep    { opacity: 0.55; margin: 0 0.45rem; }
+.fun-fact .text   { color: var(--text-dim); }
+.fun-fact .date   { color: var(--text); }
+.fun-fact .num    {
   color: var(--accent-cyan);
-  font-weight: 700;
-  text-shadow: 0 0 8px rgba(0, 229, 255, 0.45);
   display: inline-block;
 }
-.fun-fact__num--bump { animation: fun-fact-bump 0.45s ease-out; }
+.fun-fact .num--bump { animation: fun-fact-bump 0.45s ease-out; }
 @keyframes fun-fact-bump {
   0%   { transform: translateY(-2px); color: var(--accent-lime);
          text-shadow: 0 0 12px var(--accent-lime); }
   100% { transform: translateY(0); }
 }
-.fun-fact__cursor {
+.fun-fact .cursor {
   color: var(--accent-cyan);
   margin-left: 1px;
   animation: blink 1.1s steps(1) infinite;
 }
 
-/* Shrink for small screens so it doesn't crowd the site-credit */
-@media (max-width: 560px) {
+/* On small screens, shrink and let the long line wrap to the right edge */
+@media (max-width: 720px) {
   .fun-fact {
-    top: 0.6rem;
-    right: 0.6rem;
-    padding: 0.4rem 0.55rem;
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     max-width: 60vw;
+    text-align: right;
+    white-space: normal;
   }
-  .fun-fact__label { font-size: 0.62rem; }
+  .fun-fact .sep { margin: 0 0.3rem; }
 }
 
 /* ============================================================

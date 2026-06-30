@@ -27,14 +27,7 @@ export function initFunFact() {
   widget.className = 'fun-fact';
   widget.setAttribute('aria-label', 'Fun fact about this site');
   widget.innerHTML = `
-    <span class="fun-fact__label">[ Fun Fact ]</span>
-    <span class="fun-fact__line">
-      this site was born <span class="fun-fact__date">${bornLabel()}</span>
-    </span>
-    <span class="fun-fact__line">
-      <span class="fun-fact__num" data-fun-fact-minutes>0</span>
-      minutes ago<span class="fun-fact__cursor">_</span>
-    </span>
+    <span class="label">Fun Fact</span><span class="sep">|</span><span class="text">this site was born <span class="date">${bornLabel()}</span></span><span class="sep">|</span><span class="text"><span class="num" data-fun-fact-minutes>0</span> minutes ago<span class="cursor">_</span></span>
   `;
   document.body.appendChild(widget);
 
@@ -47,10 +40,10 @@ export function initFunFact() {
       numEl.textContent = fmt(minutes);
       // Tiny flash whenever a new minute clicks over
       if (lastMinutes !== -1) {
-        numEl.classList.remove('fun-fact__num--bump');
+        numEl.classList.remove('num--bump');
         // force reflow so the animation restarts
         void numEl.offsetWidth;
-        numEl.classList.add('fun-fact__num--bump');
+        numEl.classList.add('num--bump');
       }
       lastMinutes = minutes;
     }
