@@ -3,11 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>runaway_button — useless.exe</title>
-    <meta name="description" content="A button that physically refuses to be clicked." />
+    <title>complaints — useless.exe</title>
+    <meta name="description" content="Type a complaint. Get ignored." />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="runaway_button — useless.exe" />
-    <meta property="og:description" content="A button that refuses to be clicked." />
+    <meta property="og:title" content="complaints — useless.exe" />
+    <meta property="og:description" content="Type a complaint. Get ignored." />
     <meta property="og:image" content="/og-image.svg" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#050b1f" />
@@ -25,18 +25,26 @@
     </div>
 
     <header class="site-header">
-      <h1 class="brand">
-        <span class="bracket">[</span>runaway_button<span class="bracket">]</span>
-      </h1>
-      <p class="tagline">good luck<span class="cursor">_</span></p>
+      <h1 class="brand"><span class="bracket">[</span>complaint_box<span class="bracket">]</span></h1>
+      <p class="tagline">your concerns matter (citation needed)<span class="cursor">_</span></p>
     </header>
 
     <main>
       <section class="card">
-        <h2>// click the button. i dare you.</h2>
-        <div id="runaway-wrapper">
-          <button id="runaway">click me 😏</button>
-        </div>
+        <h2>// complaints filed: <span id="complaint-count">0</span></h2>
+        <form id="complaint-form" autocomplete="off">
+          <input id="complaint-input"
+                 class="text-input"
+                 type="text"
+                 maxlength="200"
+                 placeholder="type your complaint here..."
+                 aria-label="Complaint"
+                 required />
+          <button type="submit" class="btn-amber" style="margin-top: 0.75rem;">submit</button>
+        </form>
+        <p id="complaint-out" class="output-line" style="margin-top: 1rem;">
+          we are waiting, very patiently.
+        </p>
       </section>
     </main>
 

@@ -3,11 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>runaway_button — useless.exe</title>
-    <meta name="description" content="A button that physically refuses to be clicked." />
+    <title>search — useless.exe</title>
+    <meta name="description" content="A search engine that finds absolutely nothing." />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="runaway_button — useless.exe" />
-    <meta property="og:description" content="A button that refuses to be clicked." />
+    <meta property="og:title" content="search — useless.exe" />
+    <meta property="og:description" content="A search engine that finds nothing." />
     <meta property="og:image" content="/og-image.svg" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#050b1f" />
@@ -25,18 +25,24 @@
     </div>
 
     <header class="site-header">
-      <h1 class="brand">
-        <span class="bracket">[</span>runaway_button<span class="bracket">]</span>
-      </h1>
-      <p class="tagline">good luck<span class="cursor">_</span></p>
+      <h1 class="brand"><span class="bracket">[</span>nullogle<span class="bracket">]</span></h1>
+      <p class="tagline">search for anything. find nothing.<span class="cursor">_</span></p>
     </header>
 
     <main>
       <section class="card">
-        <h2>// click the button. i dare you.</h2>
-        <div id="runaway-wrapper">
-          <button id="runaway">click me 😏</button>
-        </div>
+        <form id="fake-search-form" autocomplete="off" style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+          <input id="fake-search-input"
+                 class="text-input"
+                 type="text"
+                 maxlength="120"
+                 placeholder="search the void..."
+                 aria-label="Search"
+                 style="flex: 1; min-width: 220px;"
+                 required />
+          <button type="submit">search</button>
+        </form>
+        <div id="fake-search-results" class="fake-search-results"></div>
       </section>
     </main>
 

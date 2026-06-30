@@ -3,11 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>runaway_button — useless.exe</title>
-    <meta name="description" content="A button that physically refuses to be clicked." />
+    <title>wheel — useless.exe</title>
+    <meta name="description" content="Spin the wheel of bad decisions." />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="runaway_button — useless.exe" />
-    <meta property="og:description" content="A button that refuses to be clicked." />
+    <meta property="og:title" content="wheel — useless.exe" />
+    <meta property="og:description" content="Spin the wheel of bad decisions." />
     <meta property="og:image" content="/og-image.svg" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#050b1f" />
@@ -25,18 +25,19 @@
     </div>
 
     <header class="site-header">
-      <h1 class="brand">
-        <span class="bracket">[</span>runaway_button<span class="bracket">]</span>
-      </h1>
-      <p class="tagline">good luck<span class="cursor">_</span></p>
+      <h1 class="brand"><span class="bracket">[</span>wheel_of_bad_decisions<span class="bracket">]</span></h1>
+      <p class="tagline">do not trust this wheel<span class="cursor">_</span></p>
     </header>
 
     <main>
       <section class="card">
-        <h2>// click the button. i dare you.</h2>
-        <div id="runaway-wrapper">
-          <button id="runaway">click me 😏</button>
+        <h2>// the wheel decides your fate</h2>
+        <div class="wheel-stage">
+          <div class="wheel-pointer">▼</div>
+          <div id="wheel" class="wheel"></div>
         </div>
+        <p id="wheel-out" class="output-line">spin to receive your bad decision.</p>
+        <button id="wheel-spin" class="btn-amber">spin</button>
       </section>
     </main>
 

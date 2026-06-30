@@ -9,8 +9,26 @@ import { initCatTrail } from './modules/cat-trail.js';
 import { initCreditPrompt } from './modules/credit-prompt.js';
 import { initSocialsModal } from './modules/socials-modal.js';
 
+// Site-wide chrome
+import { initFunFact } from './modules/fun-fact.js';
+import { initKonami } from './modules/konami.js';
+import { initBootSequence } from './modules/boot-sequence.js';
+import { initPixelPet } from './modules/pixel-pet.js';
+import { initGlobalCounter } from './modules/global-counter.js';
+
+// New experience modules
+import { initBored } from './modules/bored.js';
+import { initWheel } from './modules/wheel.js';
+import { initComplaints } from './modules/complaints.js';
+import { initFakeSearch } from './modules/fake-search.js';
+import { initVisitorsMap } from './modules/visitors.js';
+
 // Boot all the uselessness. Each module no-ops if its elements
 // aren't on the current page, so a single entry point works everywhere. 🥔
+initFunFact();
+initBootSequence();
+initKonami();
+
 initRunawayButton();
 initCounter();
 initLoader();
@@ -20,4 +38,13 @@ initChoiceHover();
 initCatTrail();
 initCreditPrompt();
 initSocialsModal();
+
+initBored();
+initWheel();
+initComplaints();
+initFakeSearch();
+initVisitorsMap();
+initGlobalCounter();
+
+initPixelPet();
 initPotatoes();
