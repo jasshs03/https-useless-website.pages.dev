@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>idle aura — useless.exe</title>
+    <meta name="description" content="A tiny idle game where you accumulate meaningless aura by tapping an orb and buying weird generators." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="idle aura — useless.exe" />
+    <meta property="og:description" content="Tap. Buy mystic cats. Watch numbers go brrr." />
+    <meta property="og:image" content="/og-image.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#050b1f" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="module" src="../js/main.js"></script>
+  </head>
+  <body>
+    <div class="site-credit">
+      <span class="author">Letskilljoy</span><span class="sep">|</span><span class="site">Uselesswebsite</span>
+    </div>
+
+    <div class="subpage-top">
+      <a class="back-link" href="../index.html">← back to menu</a>
+    </div>
+
+    <header class="site-header">
+      <h1 class="brand"><span class="bracket">[</span>idle aura<span class="bracket">]</span></h1>
+      <p class="tagline">accumulate meaningless energy<span class="cursor">_</span></p>
+    </header>
+
+    <main>
+      <section class="aura-game">
+
+        <!-- Top stats row -->
+        <div class="aura-stats">
+          <div class="aura-stat aura-stat--primary">
+            <span class="aura-stat__label">total aura</span>
+            <span class="aura-stat__value" id="aura-total">0</span>
+          </div>
+          <div class="aura-stat">
+            <span class="aura-stat__label">per second</span>
+            <span class="aura-stat__value aura-stat__value--rate" id="aura-rate">0.0</span>
+          </div>
+          <div class="aura-stat">
+            <span class="aura-stat__label">per tap</span>
+            <span class="aura-stat__value aura-stat__value--tap" id="aura-tap">+1</span>
+          </div>
+        </div>
+
+        <!-- The Orb -->
+        <div class="aura-orb-wrap">
+          <button class="aura-orb" id="aura-orb" type="button" aria-label="Tap the aura orb to gain aura">
+            <span class="aura-orb__ring"></span>
+            <span class="aura-orb__core">
+              <span class="aura-orb__label">tap</span>
+            </span>
+          </button>
+          <div class="aura-pop-layer" id="aura-pop-layer" aria-hidden="true"></div>
+        </div>
+
+        <!-- Generators -->
+        <div class="aura-section">
+          <h3 class="aura-section__title">// generators</h3>
+          <div class="aura-shop" id="aura-generators"></div>
+        </div>
+
+        <!-- Tap upgrades -->
+        <div class="aura-section">
+          <h3 class="aura-section__title">// tap power</h3>
+          <div class="aura-shop" id="aura-tap-upgrades"></div>
+        </div>
+
+        <!-- Controls -->
+        <div class="aura-controls">
+          <button class="btn btn-amber" id="aura-reset" type="button">reset aura</button>
+          <span class="aura-controls__hint" id="aura-saved">auto-saves to your browser</span>
+        </div>
+
+      </section>
+    </main>
+
+    <footer>
+      <span class="foot-center">
+        <span class="accent">*</span> guarantee not guaranteed &nbsp;·&nbsp; powered by 🥔
+      </span>
+    </footer>
+  </body>
+</html>
