@@ -59,8 +59,8 @@ export function initFunFact() {
   function tick() {
     const totalSeconds = Math.max(0, Math.floor((Date.now() - BORN_AT) / 1000));
     const days = Math.floor(totalSeconds / 86400);
-    // Minutes within the current day (resets at each new day, 0–1439)
-    const minutes = Math.floor((totalSeconds % 86400) / 60);
+    // Total minutes since birth (keeps climbing forever, independent of days)
+    const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
 
     secEl.textContent = fmt(seconds);
