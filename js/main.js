@@ -20,7 +20,6 @@ import { initGlobalCounter } from './modules/global-counter.js';
 import { initBored } from './modules/bored.js';
 import { initWheel } from './modules/wheel.js';
 import { initComplaints } from './modules/complaints.js';
-import { initFakeSearch } from './modules/fake-search.js';
 import { initVisitorsMap } from './modules/visitors.js';
 
 // Boot all the uselessness. Each module no-ops if its elements
@@ -42,7 +41,6 @@ initSocialsModal();
 initBored();
 initWheel();
 initComplaints();
-initFakeSearch();
 initVisitorsMap();
 initGlobalCounter();
 

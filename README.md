@@ -24,7 +24,6 @@ choose your waste of time_
 | 🥱 **bored** | Generates random useless things to do. |
 | 🎡 **wheel** | Spin the wheel of bad decisions. |
 | 💢 **complaints** | Type a complaint — get ignored. |
-| 🔎 **fake_search** | Looks like Google. Returns nothing but cats. |
 | 🌍 **visitors** | A completely fake live-visitor map. |
 
 Plus secret features: a **Fun Fact** counter (top-right) that tracks how many minutes the site has existed, the **Konami code** (↑↑↓↓←→←→BA), a pixel pet, a fake boot sequence on first visit, and an annoyed reaction when you click the author's name.

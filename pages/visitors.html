@@ -30,25 +30,68 @@
     </header>
 
     <main>
-      <section class="card" style="max-width: 900px;">
+      <section class="card" style="max-width: 1000px;">
         <h2>// your visit count: <span data-counter="visits">0</span></h2>
         <p style="color: var(--text-dim); margin-bottom: 1rem;">
           new "visitors" appear every couple of seconds. they are not real.
           your visit count is stored locally in your browser.
         </p>
         <div class="map-wrap">
-          <svg id="visitor-map" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet"
+          <svg id="visitor-map" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet"
                xmlns="http://www.w3.org/2000/svg" aria-label="fake visitor map">
-            <rect x="0" y="0" width="800" height="400" fill="rgba(0,229,255,0.04)"/>
-            <!-- Subtle grid -->
-            <g stroke="rgba(0,229,255,0.12)" stroke-width="0.5">
-              <line x1="0"   y1="100" x2="800" y2="100"/>
-              <line x1="0"   y1="200" x2="800" y2="200"/>
-              <line x1="0"   y1="300" x2="800" y2="300"/>
-              <line x1="200" y1="0"   x2="200" y2="400"/>
-              <line x1="400" y1="0"   x2="400" y2="400"/>
-              <line x1="600" y1="0"   x2="600" y2="400"/>
+            <!-- Ocean background + subtle grid -->
+            <rect x="0" y="0" width="1000" height="500" fill="rgba(0, 30, 60, 0.35)"/>
+            <g stroke="rgba(0, 229, 255, 0.10)" stroke-width="0.5">
+              <line x1="0" y1="125" x2="1000" y2="125"/>
+              <line x1="0" y1="250" x2="1000" y2="250"/>
+              <line x1="0" y1="375" x2="1000" y2="375"/>
+              <line x1="250" y1="0" x2="250" y2="500"/>
+              <line x1="500" y1="0" x2="500" y2="500"/>
+              <line x1="750" y1="0" x2="750" y2="500"/>
             </g>
+            <!-- Equator + prime meridian -->
+            <line x1="0" y1="250" x2="1000" y2="250" stroke="rgba(0, 229, 255, 0.22)" stroke-width="0.8" stroke-dasharray="4 4"/>
+            <line x1="500" y1="0" x2="500" y2="500" stroke="rgba(0, 229, 255, 0.18)" stroke-width="0.6" stroke-dasharray="3 3"/>
+
+            <!-- Stylized continent silhouettes (rough, hand-tuned to viewBox) -->
+            <g id="continents"
+               fill="rgba(127, 255, 138, 0.10)"
+               stroke="rgba(127, 255, 138, 0.55)"
+               stroke-width="1"
+               stroke-linejoin="round">
+              <!-- North America -->
+              <path d="M 95 95 L 175 80 L 260 90 L 305 130 L 340 175 L 320 215 L 280 240 L 235 250 L 210 235 L 175 200 L 150 170 L 110 150 L 95 120 Z"/>
+              <!-- Central America -->
+              <path d="M 235 250 L 270 260 L 290 280 L 280 300 L 260 305 L 240 280 Z"/>
+              <!-- South America -->
+              <path d="M 290 295 L 330 295 L 360 320 L 365 360 L 345 400 L 320 425 L 305 440 L 295 425 L 290 390 L 295 355 L 305 325 Z"/>
+              <!-- Greenland -->
+              <path d="M 380 70 L 425 60 L 445 90 L 430 115 L 395 110 L 380 90 Z"/>
+              <!-- Europe -->
+              <path d="M 470 115 L 530 105 L 555 115 L 565 140 L 555 165 L 525 175 L 495 170 L 475 155 L 465 135 Z"/>
+              <!-- Africa -->
+              <path d="M 495 180 L 575 175 L 605 200 L 620 245 L 600 290 L 575 325 L 555 360 L 535 365 L 520 345 L 505 305 L 495 265 L 490 225 Z"/>
+              <!-- Middle East / W Asia -->
+              <path d="M 570 165 L 625 165 L 660 180 L 670 205 L 650 220 L 615 215 L 590 200 L 575 185 Z"/>
+              <!-- Russia / N Asia -->
+              <path d="M 555 95 L 660 80 L 750 85 L 830 95 L 880 115 L 880 145 L 820 155 L 760 150 L 690 145 L 620 140 L 575 125 Z"/>
+              <!-- India -->
+              <path d="M 660 195 L 695 200 L 710 235 L 695 255 L 675 245 L 665 220 Z"/>
+              <!-- SE Asia / China -->
+              <path d="M 710 160 L 790 165 L 830 180 L 830 215 L 800 230 L 760 225 L 730 210 L 715 190 Z"/>
+              <!-- Indonesia / Philippines (cluster of islands) -->
+              <path d="M 800 245 L 830 245 L 855 255 L 840 270 L 815 270 L 805 260 Z"/>
+              <path d="M 855 230 L 875 230 L 880 245 L 865 250 L 855 240 Z"/>
+              <!-- Japan -->
+              <path d="M 870 175 L 890 170 L 895 195 L 880 210 L 870 200 Z"/>
+              <!-- Australia -->
+              <path d="M 815 350 L 870 345 L 905 360 L 905 395 L 875 410 L 835 405 L 810 385 Z"/>
+              <!-- New Zealand -->
+              <path d="M 925 410 L 945 415 L 945 435 L 930 435 Z"/>
+            </g>
+
+            <!-- Visitor dots layer -->
+            <g id="dots"></g>
           </svg>
         </div>
       </section>
