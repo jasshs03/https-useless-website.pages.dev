@@ -33,7 +33,9 @@ export function initFunFact() {
     '</div>',
     `<div class="fun-fact__line"><span class="date">${bornLabel()}</span></div>`,
     '<div class="fun-fact__line">',
-      '<span class="num" data-fun-fact-days>0</span> day ',
+      '<span class="num" data-fun-fact-days>0</span> Days',
+    '</div>',
+    '<div class="fun-fact__line">',
       '<span class="num" data-fun-fact-minutes>0</span> min ',
       '<span class="num" data-fun-fact-seconds>0</span> sec',
       '<span class="cursor">_</span>',
@@ -57,6 +59,7 @@ export function initFunFact() {
   function tick() {
     const totalSeconds = Math.max(0, Math.floor((Date.now() - BORN_AT) / 1000));
     const days = Math.floor(totalSeconds / 86400);
+    // Minutes within the current day (resets at each new day, 0–1439)
     const minutes = Math.floor((totalSeconds % 86400) / 60);
     const seconds = totalSeconds % 60;
 
