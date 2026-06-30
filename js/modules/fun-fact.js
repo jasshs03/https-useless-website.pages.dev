@@ -33,6 +33,7 @@ export function initFunFact() {
     '</div>',
     `<div class="fun-fact__line"><span class="date">${bornLabel()}</span></div>`,
     '<div class="fun-fact__line">',
+      '<span class="num" data-fun-fact-days>0</span> day ',
       '<span class="num" data-fun-fact-minutes>0</span> min ',
       '<span class="num" data-fun-fact-seconds>0</span> sec',
       '<span class="cursor">_</span>',
@@ -49,11 +50,14 @@ export function initFunFact() {
 
   const minEl = widget.querySelector('[data-fun-fact-minutes]');
   const secEl = widget.querySelector('[data-fun-fact-seconds]');
+  const dayEl = widget.querySelector('[data-fun-fact-days]');
   let lastMinutes = -1;
+  let lastDays = -1;
 
   function tick() {
     const totalSeconds = Math.max(0, Math.floor((Date.now() - BORN_AT) / 1000));
-    const minutes = Math.floor(totalSeconds / 60);
+    const days = Math.floor(totalSeconds / 86400);
+    const minutes = Math.floor((totalSeconds % 86400) / 60);
     const seconds = totalSeconds % 60;
 
     secEl.textContent = fmt(seconds);
@@ -67,6 +71,15 @@ export function initFunFact() {
         minEl.classList.add('num--bump');
       }
       lastMinutes = minutes;
+    }
+    if (days !== lastDays) {
+      dayEl.textContent = fmt(days);
+      if (lastDays !== -1) {
+        dayEl.classList.remove('num--bump');
+        void dayEl.offsetWidth;
+        dayEl.classList.add('num--bump');
+      }
+      lastDays = days;
     }
   }
 
