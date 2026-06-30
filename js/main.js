@@ -7,6 +7,7 @@ import { initPotatoes } from './modules/potatoes.js';
 import { initChoiceHover } from './modules/choice-hover.js';
 import { initCatTrail } from './modules/cat-trail.js';
 import { initCreditPrompt } from './modules/credit-prompt.js';
+import { initSocialsModal } from './modules/socials-modal.js';
 
 // Boot all the uselessness. Each module no-ops if its elements
 // aren't on the current page, so a single entry point works everywhere. 🥔
@@ -18,4 +19,5 @@ initNothingButton();
 initChoiceHover();
 initCatTrail();
 initCreditPrompt();
+initSocialsModal();
 initPotatoes();
