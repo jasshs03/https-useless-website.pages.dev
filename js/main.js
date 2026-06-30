@@ -25,6 +25,7 @@ import { initWheel } from './modules/wheel.js';
 import { initComplaints } from './modules/complaints.js';
 import { initVisitorsMap } from './modules/visitors.js';
 import { initIdleAura } from './modules/idle-aura.js';
+import { initFakeLocator } from './modules/fake-locator.js';
 
 // Boot all the uselessness. Each module no-ops if its elements
 // aren't on the current page, so a single entry point works everywhere. 🥔
@@ -49,6 +50,7 @@ initBored();
 initWheel();
 initComplaints();
 initVisitorsMap();
+initFakeLocator();
 initIdleAura();
 initGlobalCounter();
 
