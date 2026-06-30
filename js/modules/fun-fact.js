@@ -1,4 +1,4 @@
-// Top-right "Fun Fact" widget.
+// "Fun Fact" widget — sits directly under the Letskilljoy | Uselesswebsite credit.
 // Anchors to a fixed birth moment for the site and shows a live counter
 // (minutes + seconds) that keeps ticking for as long as the page is open.
 
@@ -27,17 +27,25 @@ export function initFunFact() {
   widget.className = 'fun-fact';
   widget.setAttribute('aria-label', 'Fun fact about this site');
   widget.innerHTML = [
-    '<span class="label">Fun Fact</span>',
-    '<span class="sep">|</span>',
-    `<span class="text">this site was born <span class="date">${bornLabel()}</span></span>`,
-    '<span class="sep">|</span>',
-    '<span class="text">',
+    '<div class="fun-fact__line fun-fact__line--header">',
+      '<span class="label">Fun Fact:</span> ',
+      '<span class="text">This useless website was Born:</span>',
+    '</div>',
+    `<div class="fun-fact__line"><span class="date">${bornLabel()}</span></div>`,
+    '<div class="fun-fact__line">',
       '<span class="num" data-fun-fact-minutes>0</span> min ',
-      '<span class="num" data-fun-fact-seconds>0</span> sec ago',
+      '<span class="num" data-fun-fact-seconds>0</span> sec',
       '<span class="cursor">_</span>',
-    '</span>'
+    '</div>'
   ].join('');
-  document.body.appendChild(widget);
+
+  // Anchor to the site-credit element so it sits right below "Letskilljoy | Uselesswebsite"
+  const credit = document.querySelector('.site-credit');
+  if (credit && credit.parentNode) {
+    credit.insertAdjacentElement('afterend', widget);
+  } else {
+    document.body.appendChild(widget);
+  }
 
   const minEl = widget.querySelector('[data-fun-fact-minutes]');
   const secEl = widget.querySelector('[data-fun-fact-seconds]');
