@@ -36,7 +36,9 @@ export function initFunFact() {
       '<span class="num" data-fun-fact-days>0</span> Days',
     '</div>',
     '<div class="fun-fact__line">',
-      '<span class="num" data-fun-fact-minutes>0</span> min ',
+      '<span class="num" data-fun-fact-minutes>0</span> min',
+    '</div>',
+    '<div class="fun-fact__line">',
       '<span class="num" data-fun-fact-seconds>0</span> sec',
       '<span class="cursor">_</span>',
     '</div>'
@@ -61,7 +63,8 @@ export function initFunFact() {
     const days = Math.floor(totalSeconds / 86400);
     // Total minutes since birth (keeps climbing forever, independent of days)
     const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
+    // Total seconds since birth (also keeps climbing forever)
+    const seconds = totalSeconds;
 
     secEl.textContent = fmt(seconds);
     if (minutes !== lastMinutes) {
